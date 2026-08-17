@@ -9,14 +9,14 @@ class FakeChild extends EventEmitter {
 }
 
 describe('resolveCodegraphCli', () => {
-  it('joins dist/bin/codegraph.js onto the package directory', () => {
+  it('joins npm-shim.js onto the package directory', () => {
     const requireImpl = ((() => {
       throw new Error('unused')
     }) as unknown as NodeJS.Require)
-    requireImpl.resolve = (id: string) => {
+    requireImpl.resolve = ((id: string) => {
       expect(id).toBe('@colbymchenry/codegraph/package.json')
       return '/mods/@colbymchenry/codegraph/package.json'
-    }
+    }) as NodeJS.RequireResolve
     expect(resolveCodegraphCli(requireImpl).replaceAll('\\', '/'))
       .toBe('/mods/@colbymchenry/codegraph/npm-shim.js')
   })
