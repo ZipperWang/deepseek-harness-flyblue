@@ -29,14 +29,15 @@
   - img
   - text: Standard mode
   - img
+- text: This workspace has no code index yet
+- button "Initialize"
+- button "Dismiss"
 - textbox "Describe what you want to build"
 - button "Commands":
   - img
 - 'button "Access mode, current: Workspace Write"': Workspace Write
 - button "Plan mode on, press to turn off": Plan
-- button "Select model, current DeepSeek-V4-Flash":
-  - text: DeepSeek-V4-Flash
-  - img
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - text: Details
 - button "Close details"

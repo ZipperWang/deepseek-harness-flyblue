@@ -22,10 +22,10 @@
   - img
   - img
   - text: Context injection @deepseek-ai/dsh-system-prompt
-- 'button "Think The user''s goal is: \"做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的\" — which translates to: \"Do two turns, each turn output the file structure of a random package. Note that after you finish one turn, directly output the content and stop; our system will help you open another turn, and you just do something similar.\""':
+- 'button "Think The user''s goal is: \"做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的\" �?which translates to: \"Do two turns, each turn output the file structure of a random package. Note that after you finish one turn, directly output the content and stop; our system will help you open another turn, and you just do something similar.\""':
   - img
   - img
-  - text: "Think The user's goal is: \"做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的\" — which translates to: \"Do two turns, each turn output the file structure of a random package. Note that after you finish one turn, directly output the content and stop; our system will help you open another turn, and you just do something similar.\""
+  - text: "Think The user's goal is: \"做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的\" �?which translates to: \"Do two turns, each turn output the file structure of a random package. Note that after you finish one turn, directly output the content and stop; our system will help you open another turn, and you just do something similar.\""
 - button "Bash Show working directory and its contents":
   - img
   - img
@@ -65,21 +65,19 @@
   - img
   - img
   - text: Bash List all files in session-reference package
-- 'button "Think Turn 1 is done. Per the objective: \"你做完一个turn之后，直接输出内容，停止\" — after finishing a turn, directly output the content and stop. The system will open another turn."':
+- 'button "Think Turn 1 is done. Per the objective: \"你做完一个turn之后，直接输出内容，停止\" �?after finishing a turn, directly output the content and stop. The system will open another turn."':
   - img
   - img
-  - text: "Think Turn 1 is done. Per the objective: \"你做完一个turn之后，直接输出内容，停止\" — after finishing a turn, directly output the content and stop. The system will open another turn."
+  - text: "Think Turn 1 is done. Per the objective: \"你做完一个turn之后，直接输出内容，停止\" �?after finishing a turn, directly output the content and stop. The system will open another turn."
 - paragraph:
   - strong: Turn 1 / 2
-  - text: — 随机选中的包：
-  - code: packages/context/session-reference
+  - text: �?随机选中的包�?  - code: packages/context/session-reference
   - text: 📦
 - button "Copy"
-- code: session-reference ├── README.md ├── package.json ├── src │ ├── index.ts │ └── uri.ts └── tests └── session-reference.spec.ts
+- code: session-reference ├── README.md ├── package.json ├── src �?├── index.ts �?└── uri.ts └── tests └── session-reference.spec.ts
 - button "Copy"
-- code: "session-reference/ ├── README.md # 包说明文档 ├── package.json # 包元数据与依赖声明 ├── src/ │ ├── index.ts # 入口，导出公共 API │ └── uri.ts # 会话引用 URI 相关实现 └── tests/ └── session-reference.spec.ts # 单元测试"
-- paragraph: 这是一个很典型的轻量 TypeScript 包结构：入口 + 实现 + 测试。这一轮到此结束，等系统开启下一个 turn。
-- button "Copy":
+- code: "session-reference/ ├── README.md # 包说明文�?├── package.json # 包元数据与依赖声�?├── src/ �?├── index.ts # 入口，导出公�?API �?└── uri.ts # 会话引用 URI 相关实现 └── tests/ └── session-reference.spec.ts # 单元测试"
+- paragraph: 这是一个很典型的轻�?TypeScript 包结构：入口 + 实现 + 测试。这一轮到此结束，等系统开启下一�?turn�?- button "Copy":
   - img
 - button "Good response":
   - img
@@ -118,25 +116,20 @@
   - text: "Think This is turn 2 of 2. I've output the file structure for `packages/llm/token-meter`. Both turns are done. I should output the content, stop, and then mark the goal as complete since both turns are finished."
 - paragraph:
   - strong: Turn 2 / 2
-  - text: — 随机选中的包：
-  - code: packages/llm/token-meter
+  - text: �?随机选中的包�?  - code: packages/llm/token-meter
   - text: 📦
 - button "Copy"
-- code: token-meter ├── README.md ├── package.json ├── src │ └── index.ts └── tests └── token-meter.spec.ts
+- code: token-meter ├── README.md ├── package.json ├── src �?└── index.ts └── tests └── token-meter.spec.ts
 - button "Copy"
-- code: "token-meter/ ├── README.md # 包说明文档 ├── package.json # 包元数据与依赖声明 ├── src/ │ └── index.ts # 入口，导出公共 API（token 计量逻辑） └── tests/ └── token-meter.spec.ts # 单元测试"
+- code: "token-meter/ ├── README.md # 包说明文�?├── package.json # 包元数据与依赖声�?├── src/ �?└── index.ts # 入口，导出公�?API（token 计量逻辑�?└── tests/ └── token-meter.spec.ts # 单元测试"
 - paragraph:
-  - text: 两个 turn 都完成了（turn 1：
-  - code: session-reference
-  - text: ，turn 2：
-  - code: token-meter
-  - text: ）。这一轮到此结束。
-- 'button "Tool call get_goal · {}"':
+  - text: 两个 turn 都完成了（turn 1�?  - code: session-reference
+  - text: ，turn 2�?  - code: token-meter
+  - text: ）。这一轮到此结束�?- 'button "Tool call get_goal · {}"':
   - img
   - img
   - text: "Tool call get_goal · {}"
-- paragraph: 两个 turn 均已完成，目标达成，标记 goal 为完成。
-- button "Tool call update_goal · goal-{{uuid}}":
+- paragraph: 两个 turn 均已完成，目标达成，标记 goal 为完成�?- button "Tool call update_goal · goal-{{uuid}}":
   - img
   - img
   - text: Tool call update_goal · goal-{{uuid}}
@@ -144,55 +137,40 @@
   - img
   - img
   - text: "Context injection tool-goal complete: 做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的"
-- paragraph: 两个 turn 都完成了 ✅
-- paragraph:
-  - strong: 总结：
-- list:
+- paragraph: 两个 turn 都完成了 �?- paragraph:
+  - strong: 总结�?- list:
   - listitem:
     - strong: Turn 1
-    - text: — 随机选中
+    - text: �?随机选中
     - code: packages/context/session-reference
-    - text: ，输出了文件结构：
-    - button "Copy"
-    - code: session-reference/ ├── README.md ├── package.json ├── src/ │ ├── index.ts │ └── uri.ts └── tests/ └── session-reference.spec.ts
+    - text: ，输出了文件结构�?    - button "Copy"
+    - code: session-reference/ ├── README.md ├── package.json ├── src/ �?├── index.ts �?└── uri.ts └── tests/ └── session-reference.spec.ts
   - listitem:
     - strong: Turn 2
-    - text: — 随机选中
+    - text: �?随机选中
     - code: packages/llm/token-meter
-    - text: ，输出了文件结构：
-    - button "Copy"
-    - code: token-meter/ ├── README.md ├── package.json ├── src/ │ └── index.ts └── tests/ └── token-meter.spec.ts
+    - text: ，输出了文件结构�?    - button "Copy"
+    - code: token-meter/ ├── README.md ├── package.json ├── src/ �?└── index.ts └── tests/ └── token-meter.spec.ts
 - paragraph:
-  - strong: 验证方式：
-  - text: 两个包的随机选择都通过
+  - strong: 验证方式�?  - text: 两个包的随机选择都通过
   - code: python3 random.choice
-  - text: 从工作区的
-  - code: packages/
+  - text: 从工作区�?  - code: packages/
   - text: 目录下实际枚举的 4 个候选包中抽取（
   - code: ui-conversation
-  - text: 、
-  - code: session-reference
-  - text: 、
-  - code: token-meter
-  - text: 、
-  - code: skill-filesystem
+  - text: �?  - code: session-reference
+  - text: �?  - code: token-meter
+  - text: �?  - code: skill-filesystem
   - text: ），文件结构则用
   - code: find
   - text: 实际列出文件后整理输出，均已排除
   - code: node_modules
-  - text: 和
-  - code: .git
-  - text: 。第二次随机抽到了与 turn 1 相同的包，为避免重复换抽了另一个。
-- paragraph:
-  - strong: 说明：
-  - text: 本轮没有产生任何文件修改或提交——任务本身就是"输出文件结构"，所有产物都在上面的消息文本里。
-- paragraph:
+  - text: �?  - code: .git
+  - text: 。第二次随机抽到了与 turn 1 相同的包，为避免重复换抽了另一个�?- paragraph:
+  - strong: 说明�?  - text: 本轮没有产生任何文件修改或提交——任务本身就�?输出文件结构"，所有产物都在上面的消息文本里�?- paragraph:
   - text: 如果你还想看剩下两个包（
   - code: ui-conversation
-  - text: 、
-  - code: skill-filesystem
-  - text: ）的结构，或者其他格式的输出（比如带文件大小的树形图），随时告诉我。
-- button "Copy":
+  - text: �?  - code: skill-filesystem
+  - text: ）的结构，或者其他格式的输出（比如带文件大小的树形图），随时告诉我�?- button "Copy":
   - img
 - button "Good response":
   - img
@@ -206,9 +184,7 @@
 - button "Commands":
   - img
 - 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
-  - text: DeepSeek-V4-Flash
-  - img
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "9% of context used"
 - button "Send message" [disabled]
 - text: 2 turns · 12 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 91% Input 113K tok · Output 2.4K tok

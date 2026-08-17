@@ -1,0 +1,32 @@
+{
+  "name": "dsh-client-ui-effort-slider",
+  "version": "0.7.0",
+  "description": "Animated reasoning-level slider for DeepSeek Harness model selection.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MEMZ-JZY/DSH-Claude-Style-Reasoning-Slider.git"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": ["index.js", "cordis.patch.yml", "lib/client.js", "assets/liang-frames/*.webp", "assets/chibi-runner-strip.png", "README.md"],
+  "scripts": { "build": "node scripts/build-client.mjs" },
+  "publishConfig": { "access": "public" },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-cordis-client-runner"
+      ]
+    }
+  },
+  "license": "MIT"
+}

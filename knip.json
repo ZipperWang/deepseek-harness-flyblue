@@ -780,7 +780,13 @@
     },
     "packages/bundle/web-app": {
       "ignoreDependencies": [
-        "@deepseek-ai/.+"
+        "@deepseek-ai/.+",
+        "dsh-client-ui-effort-slider"
+      ]
+    },
+    "packages/codegraph/tool-codegraph": {
+      "ignoreDependencies": [
+        "@colbymchenry/codegraph"
       ]
     }
   }

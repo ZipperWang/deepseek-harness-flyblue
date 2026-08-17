@@ -6,7 +6,7 @@
 
 ## 配置模型
 
-打开**设置 → 模型**，输入 DeepSeek API 密钥并保存。模型路由会立即可用，不需要重启服务器。
+打开**设置 → 模型**，输入 DeepSeek API 密钥并保存。模型路由会立即可用，不需要重启服务器。输入框的模型芯片是 Claude 风格推理滑块：先选模型，再选 Off / Low / Medium / High / Extra / Max。停用 profile 中的 `effort-slider` 行即可恢复原生触发器。
 
 [模型配置指南](./providers.md)介绍其他提供方和自定义 OpenAI 兼容端点。
 

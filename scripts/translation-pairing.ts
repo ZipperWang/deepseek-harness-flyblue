@@ -140,6 +140,7 @@ const NON_SOURCE_DIRECTORIES = new Set([
   '.pytest_cache',
   '.artifacts',
   'vendor',
+  'third-party',
 ])
 
 /** Glob traversal exclusions corresponding to the non-source path predicate. */
@@ -163,6 +164,7 @@ export const TRANSLATION_SCOPE_GLOB_EXCLUDES = [
   'python/sdk-runtime/src/deepseek_harness_runtime/runtime/dsh-jsonrpc-agent-*/**',
   'python/sdk-runtime/src/deepseek_harness_runtime/runtime/node/**',
   'vendor/**',
+  'third-party/**',
 ]
 
 /** Whether a repository-relative path belongs to a dependency or generated tree. */

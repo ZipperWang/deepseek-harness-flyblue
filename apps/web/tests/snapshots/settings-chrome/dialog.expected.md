@@ -46,3 +46,5 @@
   - button "排队发送":
     - text: 排队发送
     - img
+  - text: 大肥鱼滑块 用大肥鱼替换滑块按钮
+  - switch

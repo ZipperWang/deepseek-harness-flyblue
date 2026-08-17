@@ -1,3 +1,4 @@
 - listbox "Trigger suggestions":
   - text: Commands
   - option "compact Compact older conversation history" [selected]
+  - option "codegraph-init Initialize the CodeGraph index for this workspace"

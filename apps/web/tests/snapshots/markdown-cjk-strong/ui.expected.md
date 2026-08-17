@@ -12,26 +12,22 @@
   - img
 - heading "CJK strong emphasis" [level=2]
 - paragraph:
-  - strong: 注意：
-  - text: 内容
+  - strong: 注意�?  - text: 内容
 - paragraph:
   - strong: "Notice:"
   - text: 内容
 - paragraph:
-  - strong: 事件中间件（waterfall）
+  - strong: 事件中间件（waterfall�?  - text: 实现
+- paragraph:
+  - strong: 事件中间�?waterfall)
   - text: 实现
 - paragraph:
-  - strong: 事件中间件(waterfall)
-  - text: 实现
-- paragraph:
-  - strong: 句号。
-  - text: 后续
+  - strong: 句号�?  - text: 后续
 - paragraph:
   - strong: Period.
   - text: 后续
 - paragraph:
-  - strong: 提醒！
-  - text: 继续
+  - strong: 提醒�?  - text: 继续
 - paragraph:
   - strong: Warning!
   - text: 继续
@@ -49,8 +45,6 @@
 - button "Commands":
   - img
 - 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
-  - text: DeepSeek-V4-Flash
-  - img
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - text: 1 turns · 1 steps LLM {{duration}}

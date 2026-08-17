@@ -1450,6 +1450,9 @@ importers:
       commander:
         specifier: ^15.0.0
         version: 15.0.0
+      dsh-client-ui-effort-slider:
+        specifier: file:../../../third-party/dsh-client-ui-effort-slider
+        version: file:third-party/dsh-client-ui-effort-slider
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:^
@@ -12247,6 +12250,9 @@ packages:
   dompurify@3.4.11:
     resolution: {integrity: sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw==}
 
+  dsh-client-ui-effort-slider@file:third-party/dsh-client-ui-effort-slider:
+    resolution: {directory: third-party/dsh-client-ui-effort-slider, type: directory}
+
   dts-resolver@3.0.0:
     resolution: {integrity: sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q==}
     engines: {node: ^22.18.0 || >=24.0.0}
@@ -17400,6 +17406,8 @@ snapshots:
   dompurify@3.4.11:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
+
+  dsh-client-ui-effort-slider@file:third-party/dsh-client-ui-effort-slider: {}
 
   dts-resolver@3.0.0(oxc-resolver@11.20.0):
     optionalDependencies:

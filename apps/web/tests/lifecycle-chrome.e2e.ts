@@ -88,6 +88,7 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
     await input.fill('/cpt')
     await expect.poll(() => menu.getByRole('option').allTextContents()).toEqual([
       'compactCompact older conversation history',
+      'codegraph-initInitialize the CodeGraph index for this workspace',
     ])
     const fuzzySnapshot = await captureStableAria(page, '[role="listbox"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(FUZZY_COMMAND_MENU_EXPECTED, fuzzySnapshot, MODE)

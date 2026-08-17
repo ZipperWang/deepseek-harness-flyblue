@@ -262,6 +262,11 @@
     - id: ui-model-selection
       name: '@deepseek-ai/dsh-client-ui-model-selection'
 
+    # Claude-style reasoning slider: shadows conversation.input.model (priority -1).
+    # Native ui-model-selection stays for /model and ctx.modelDirectories.
+    - id: effort-slider
+      name: dsh-client-ui-effort-slider
+
     - id: ui-permission
       name: '@deepseek-ai/dsh-client-ui-permission-presets'
 

@@ -6,3 +6,9 @@
   config:
     provider: acme-gateway
     model: acme-think
+
+# This scenario pins the reasoning-declaration contract to the native
+# ui-model-selection menu; the shipped effort-slider row would replace that
+# menu with a slider and change the picked-level interaction surface.
+- id: effort-slider
+  disabled: true

@@ -91,9 +91,7 @@
 - button "Commands":
   - img
 - 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
-  - text: DeepSeek-V4-Flash
-  - img
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "0% of context used"
 - button "Send message" [disabled]
 - text: 3 turns · 7 steps LLM {{duration}} · Tool call {{duration}} Cache hit 77% Input 66.5K tok · Output 318 tok
