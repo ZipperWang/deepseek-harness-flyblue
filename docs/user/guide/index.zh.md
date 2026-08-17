@@ -16,7 +16,7 @@
 
 ## 为工作区建立代码索引
 
-未建索引的工作区上，新建空白会话会在输入框上方显示**初始化** / **忽略**。初始化会创建 `.codegraph/`，之后 `codegraph_explore` 才能回答结构性问题。**设置 → 代码索引**可以稍后启动 init，也可以打开自动 init，让之后的新会话不再询问。CLI 与 headless 用户仍需自行运行 `codegraph init`。
+未建索引的工作区上，新建空白会话会在输入框上方显示**初始化** / **忽略**。初始化会创建 `.codegraph/`，之后 `codegraph_explore` 才能回答结构性问题。`/codegraph-init` 会启动同一 host 任务。**设置 → 代码索引**可以稍后启动 init，也可以打开自动 init，让之后的新会话不再询问。CLI 与 headless 用户仍需自行运行 `codegraph init`。
 
 ## 运行任务
 

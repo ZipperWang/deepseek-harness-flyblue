@@ -2414,7 +2414,7 @@ export interface Config {
 export type CodegraphIsolation = 'auto' | 'in-process' | 'subprocess'
 ```
 
-来源：[`packages/codegraph/tool-codegraph/src/index.ts:81`](../packages/codegraph/tool-codegraph/src/index.ts)
+来源：[`packages/codegraph/tool-codegraph/src/index.ts:89`](../packages/codegraph/tool-codegraph/src/index.ts)
 
 <a id="deepseek-aidsh-tool-fs"></a>
 
@@ -3105,6 +3105,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-user-questions`（[`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-workflow-run`（[`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-workspace`（[`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts)）
+- `@deepseek-ai/dsh-command-codegraph-init` — 需要 `commands` · `codegraphIndex`（[`packages/codegraph/command-codegraph-init/src/index.ts`](../packages/codegraph/command-codegraph-init/src/index.ts)）
 - `@deepseek-ai/dsh-command-compact` — 需要 `commands` · `compact`（[`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts)）
 - `@deepseek-ai/dsh-command-feedback` — 需要 `commands`（[`packages/feedback/command-feedback/src/index.ts`](../packages/feedback/command-feedback/src/index.ts)）
 - `@deepseek-ai/dsh-command-goal` — 需要 `commands` · `goals`（[`packages/goal/command-goal/src/index.ts`](../packages/goal/command-goal/src/index.ts)）

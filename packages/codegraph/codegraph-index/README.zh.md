@@ -6,7 +6,7 @@ Web GUI 的 host 平面 CodeGraph 索引生命周期。`ctx.codegraphIndex` 提�
 
 `codegraph` 设置命名空间保存 `{ autoInit: boolean }`（默认 `false`）。`autoInit` 为 true 时，`session/created` 会对带 cwd、尚未建索引的会话启动 init。CLI / headless / ACP 组装不挂本插件，因此不会自动 init。
 
-面向模型的 `@deepseek-ai/dsh-tool-codegraph` 插件仍然从不执行 init。只有用户点击或本 host 的自动 init 路径会创建 `.codegraph/`。
+面向模型的 `@deepseek-ai/dsh-tool-codegraph` 插件仍然从不执行 init。只有用户点击、`/codegraph-init`，或本 host 的自动 init 路径会创建 `.codegraph/`。同级 [`dsh-command-codegraph-init`](../command-codegraph-init/README.md) 是面向用户的命令消费方。
 
 ```yaml
 - id: codegraph-index

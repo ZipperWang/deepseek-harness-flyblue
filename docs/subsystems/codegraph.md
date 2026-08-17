@@ -2,7 +2,7 @@
 
 English | [中文](codegraph.zh.md)
 
-Host-plane index lifecycle for the Web GUI. `ctx.codegraphIndex` reads `session.header.cwd` and starts `codegraph init`; the model-facing tools stay in [`dsh-tool-codegraph`](../../packages/codegraph/tool-codegraph/README.md). Design record: [Web host CodeGraph index manager](../../.agents/notes/implemented/feature/2026-08-13-web-codegraph-index-manager.md).
+Host-plane index lifecycle for the Web GUI. `ctx.codegraphIndex` reads `session.header.cwd` and starts `codegraph init`; `/codegraph-init` is the human command consumer in [`dsh-command-codegraph-init`](../../packages/codegraph/command-codegraph-init/README.md). The model-facing tools stay in [`dsh-tool-codegraph`](../../packages/codegraph/tool-codegraph/README.md). Design record: [Web host CodeGraph index manager](../../.agents/notes/implemented/feature/2026-08-13-web-codegraph-index-manager.md).
 
 Source: [`packages/codegraph/codegraph-index/src/types.ts`](../../packages/codegraph/codegraph-index/src/types.ts)
 

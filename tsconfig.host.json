@@ -296,6 +296,7 @@
     { "path": "./packages/lsp/tool-lsp" },
     { "path": "./packages/codegraph/tool-codegraph" },
     { "path": "./packages/codegraph/codegraph-index" },
+    { "path": "./packages/codegraph/command-codegraph-init" },
     { "path": "./apps/cli" }
   ]
 }

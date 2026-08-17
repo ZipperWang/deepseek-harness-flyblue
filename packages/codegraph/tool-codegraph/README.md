@@ -6,7 +6,7 @@ The model-facing **CodeGraph tool suite** over the bundled [`@colbymchenry/codeg
 
 Namespace plugin (`name` / `inject` / `Config` / `apply`, no default export). Injects `tools` and `systemPrompt`.
 
-Registration does not require a `.codegraph/` index. A missing index or a failed engine load stays a successful tool result that tells the model to use `read`/`grep`/`glob`. The plugin never runs `codegraph init`. The Web GUI and optional auto-init live in `@deepseek-ai/dsh-codegraph-index` and start only from a user click or the `autoInit` setting.
+Registration does not require a `.codegraph/` index. A missing index or a failed engine load stays a successful tool result that tells the model to use `read`/`grep`/`glob`. The plugin never runs `codegraph init`. The Web GUI and optional auto-init live in `@deepseek-ai/dsh-codegraph-index` and start only from a user click, `/codegraph-init`, or the `autoInit` setting.
 
 ## Tools
 
@@ -116,7 +116,7 @@ None; UI presentation is outside the model request.
 
 ## Known Limitations and Deferred Work
 
-- **Each workspace still needs a `.codegraph/` index** — the harness ships the engine and the tools, not a per-repo index. Creating the index is the user's decision: the Web「代码索引」page, auto-init, or `codegraph init`. The agent still must not run init.
+- **Each workspace still needs a `.codegraph/` index** — the harness ships the engine and the tools, not a per-repo index. Creating the index is the user's decision: the Web「代码索引」page, `/codegraph-init`, auto-init, or `codegraph init`. The agent still must not run init.
 - **Explore token-matches the query** — open prose, a lone path, and negative lookups fail open. The `tool:codegraph` prompt is the query contract; extras stay off by default because they duplicate explore and spend schema tokens.
 - **In-process `ToolHandler` is a version-pinned internal import** — `@colbymchenry/codegraph`'s public entry exports `CodeGraph` but not `ToolHandler`; this package loads `ToolHandler` from the matching platform bundle (`lib/dist/mcp/index.js`) and pins `1.5.0`. A contract test fails if those exports move. The subprocess path runs the package's `npm-shim.js` so the bundled Node 24 executes the CLI.
 - **No host-plane graph cache** — each mounted preset fiber holds its own read-only opens. A later shared `ctx.codegraph` service is deferred.

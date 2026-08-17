@@ -6,7 +6,7 @@ Host-plane CodeGraph index lifecycle for the Web GUI. `ctx.codegraphIndex` expos
 
 The `codegraph` settings namespace holds `{ autoInit: boolean }` (default `false`). When `autoInit` is true, `session/created` starts init for a session that has a cwd and is not already indexed. CLI, headless, and ACP assemblies do not mount this plugin, so they never auto-init.
 
-The model-facing `@deepseek-ai/dsh-tool-codegraph` plugin still never runs init. Only a user click or this host auto-init path creates `.codegraph/`.
+The model-facing `@deepseek-ai/dsh-tool-codegraph` plugin still never runs init. Only a user click, `/codegraph-init`, or this host auto-init path creates `.codegraph/`. The sibling [`dsh-command-codegraph-init`](../command-codegraph-init/README.md) is the human command consumer.
 
 ```yaml
 - id: codegraph-index

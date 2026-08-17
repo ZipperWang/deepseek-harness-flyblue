@@ -98,6 +98,10 @@
     - id: codegraph-index
       name: '@deepseek-ai/dsh-codegraph-index'
 
+    # Human `/codegraph-init`: start the same host-plane job as the dock and settings page.
+    - id: command-codegraph-init
+      name: '@deepseek-ai/dsh-command-codegraph-init'
+
     # The API gateway: the transport-agnostic dispatch face every client shape
     # shares. The base layer's agent-default-model service owns the default model.
     - id: api-gateway

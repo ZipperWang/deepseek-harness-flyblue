@@ -2,7 +2,7 @@
 
 [English](codegraph.md) | 中文
 
-Web GUI 的 host 平面索引生命周期。`ctx.codegraphIndex` 读取 `session.header.cwd` 并启动 `codegraph init`；面向模型的工具仍在 [`dsh-tool-codegraph`](../../packages/codegraph/tool-codegraph/README.md)。设计记录：[Web host CodeGraph 索引管理器](../../.agents/notes/implemented/feature/2026-08-13-web-codegraph-index-manager.md)。
+Web GUI 的 host 平面索引生命周期。`ctx.codegraphIndex` 读取 `session.header.cwd` 并启动 `codegraph init`；`/codegraph-init` 是 [`dsh-command-codegraph-init`](../../packages/codegraph/command-codegraph-init/README.md) 中的用户命令消费方。面向模型的工具仍在 [`dsh-tool-codegraph`](../../packages/codegraph/tool-codegraph/README.md)。设计记录：[Web host CodeGraph 索引管理器](../../.agents/notes/implemented/feature/2026-08-13-web-codegraph-index-manager.md)。
 
 来源：[`packages/codegraph/codegraph-index/src/types.ts`](../../packages/codegraph/codegraph-index/src/types.ts)
 

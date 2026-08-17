@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-13-web-codegraph-index-manager.md
-2026-08-13-web-codegraph-index-manager.md: 7d1483e75cee14e84af8c8aa8cf5c2c5554c6564
-2026-08-13-web-codegraph-index-manager.zh.md: bc0441b21fd05e6549b15cbc2c8fcf8ca437839f
+2026-08-13-web-codegraph-index-manager.md: 151a6aa4973d503b85d8b0190844612794020528
+2026-08-13-web-codegraph-index-manager.zh.md: aebae027a5bf8f3f8a414606621c7b93b61c4702

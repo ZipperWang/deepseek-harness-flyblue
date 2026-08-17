@@ -6,7 +6,7 @@
 
 命名空间插件（`name` / `inject` / `Config` / `apply`，无 default 导出）。注入 `tools` 与 `systemPrompt`。
 
-注册不要求已有 `.codegraph/` 索引。缺少索引或引擎加载失败时，工具仍返回成功形态的指引，让模型改用 `read`/`grep`/`glob`。本插件从不执行 `codegraph init`。Web GUI 与可选的自动 init 在 `@deepseek-ai/dsh-codegraph-index`，只由用户点击或 `autoInit` 设置启动。
+注册不要求已有 `.codegraph/` 索引。缺少索引或引擎加载失败时，工具仍返回成功形态的指引，让模型改用 `read`/`grep`/`glob`。本插件从不执行 `codegraph init`。Web GUI 与可选的自动 init 在 `@deepseek-ai/dsh-codegraph-index`，只由用户点击、`/codegraph-init` 或 `autoInit` 设置启动。
 
 ## 工具
 
@@ -116,7 +116,7 @@ Codegraph is a local SQLite symbol graph. Call `codegraph_explore` first on inde
 
 ## 已知限制与延期工作
 
-- **每个 workspace 仍需要 `.codegraph/` 索引** — harness 附带引擎和工具，不附带每个仓库的索引。建索引是用户的决定：Web「代码索引」页、自动 init，或 `codegraph init`。Agent 仍然不得自行 init。
+- **每个 workspace 仍需要 `.codegraph/` 索引** — harness 附带引擎和工具，不附带每个仓库的索引。建索引是用户的决定：Web「代码索引」页、`/codegraph-init`、自动 init，或 `codegraph init`。Agent 仍然不得自行 init。
 - **Explore 按 token 匹配查询** — 开放散文、单独路径和负例探查会 fail-open。`tool:codegraph` 提示词就是查询约定；默认不开 extras，因为它们重复 explore 且消耗 schema token。
 - **进程内 `ToolHandler` 是钉版本的内部导入** — `@colbymchenry/codegraph` 的公开入口导出 `CodeGraph` 但不导出 `ToolHandler`；本包从对应平台包的 `lib/dist/mcp/index.js` 加载 `ToolHandler`，并钉死 `1.5.0`。这些导出若移动，契约测试会失败。子进程路径运行包内的 `npm-shim.js`，由随包 Node 24 执行 CLI。
 - **没有 host 平面的图缓存** — 每个已挂载 preset fiber 持有自己的只读打开。共享的 `ctx.codegraph` 服务延期。

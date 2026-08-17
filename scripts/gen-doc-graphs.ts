@@ -544,8 +544,8 @@ const SERVICE_ROLES: ServiceRole[] = [
     pkg: 'codegraph-index',
     title: 'Web host CodeGraph index lifecycle',
     mode: 'core',
-    consumers: ['client-ui-codegraph'],
-    note: 'status and init read session.header.cwd and start codegraph init; the model-facing tool plugin never does.',
+    consumers: ['client-ui-codegraph', 'command-codegraph-init'],
+    note: 'status and init read session.header.cwd and start codegraph init; /codegraph-init is the human command consumer; the model-facing tool plugin never does.',
   },
   {
     key: 'apiProxy',

@@ -16,7 +16,7 @@ Click **Choose workspace**, add the project directory where you started `dsh`, a
 
 ## Index the workspace
 
-A new blank session on an unindexed workspace shows **Initialize** / **Dismiss** above the composer. Initialize creates `.codegraph/` so `codegraph_explore` can answer structural questions. **Settings → Code index** can start init later and can turn on auto-init for future sessions. CLI and headless users still run `codegraph init` themselves.
+A new blank session on an unindexed workspace shows **Initialize** / **Dismiss** above the composer. Initialize creates `.codegraph/` so `codegraph_explore` can answer structural questions. `/codegraph-init` starts the same host job. **Settings → Code index** can start init later and can turn on auto-init for future sessions. CLI and headless users still run `codegraph init` themselves.
 
 ## Run a task
 
