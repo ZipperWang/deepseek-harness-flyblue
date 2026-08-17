@@ -467,6 +467,19 @@ export interface Config {
 
 来源：[`packages/code-runtime/code-runtime-worker-thread/src/index.ts:25`](../packages/code-runtime/code-runtime-worker-thread/src/index.ts)
 
+<a id="deepseek-aidsh-codegraph-index"></a>
+
+## `@deepseek-ai/dsh-codegraph-index`
+
+需要：`sessions`
+
+```ts config-catalog
+/** This host service has no loader config; settings live in the `codegraph` namespace. */
+export type Config = Readonly<Record<string, never>>
+```
+
+来源：[`packages/codegraph/codegraph-index/src/index.ts:26`](../packages/codegraph/codegraph-index/src/index.ts)
+
 <a id="deepseek-aidsh-compaction-basic"></a>
 
 ## `@deepseek-ai/dsh-compaction-basic`
@@ -2401,7 +2414,7 @@ export interface Config {
 export type CodegraphIsolation = 'auto' | 'in-process' | 'subprocess'
 ```
 
-来源：[`packages/codegraph/tool-codegraph/src/index.ts:80`](../packages/codegraph/tool-codegraph/src/index.ts)
+来源：[`packages/codegraph/tool-codegraph/src/index.ts:81`](../packages/codegraph/tool-codegraph/src/index.ts)
 
 <a id="deepseek-aidsh-tool-fs"></a>
 
@@ -3063,6 +3076,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-modules` — 需要 `webServer` · `loader`（[`packages/client/modules/src/index.ts`](../packages/client/modules/src/index.ts)）
 - `@deepseek-ai/dsh-client-runtime`（[`packages/client/runtime/src/index.ts`](../packages/client/runtime/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-agent-preset`（[`packages/client/ui-agent-preset/src/index.ts`](../packages/client/ui-agent-preset/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-codegraph`（[`packages/client/ui-codegraph/src/index.ts`](../packages/client/ui-codegraph/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-commands`（[`packages/client/ui-commands/src/index.ts`](../packages/client/ui-commands/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-conversation`（[`packages/client/ui-conversation/src/index.ts`](../packages/client/ui-conversation/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-cordis`（[`packages/extensions/ui-cordis/src/index.ts`](../packages/extensions/ui-cordis/src/index.ts)）

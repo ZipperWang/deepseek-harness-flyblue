@@ -21,7 +21,7 @@ packages/    @deepseek-ai/dsh-<pkg> workspaces at packages/<group>/<pkg>/
   terminal/         persistent sessions
   fs/          filesystem capability + policy
   lsp/         language-server capability
-  codegraph/   CodeGraph explore tool
+  codegraph/   CodeGraph + index
   skill/       skill provider registry + local impl + catalog/loader tool
   web/         web capability: Service Definition + search/fetch providers + tool Consumer
   compaction/     compaction capability + basic provider

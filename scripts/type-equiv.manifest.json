@@ -1436,6 +1436,16 @@
       "source": "packages/lsp/lsp/src/types.ts"
     },
     {
+      "doc": "docs/subsystems/codegraph.md",
+      "symbol": "CodegraphIndexStatus",
+      "source": "packages/codegraph/codegraph-index/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/codegraph.md",
+      "symbol": "CodegraphSettings",
+      "source": "packages/codegraph/codegraph-index/src/types.ts"
+    },
+    {
       "doc": "docs/subsystems/persistence.md",
       "symbol": "SessionPersistenceRevision",
       "source": "packages/session/session-persistence/src/revision.ts"

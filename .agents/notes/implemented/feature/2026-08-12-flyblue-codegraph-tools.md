@@ -22,13 +22,13 @@ In-process dispatch uses `CodeGraph.open({ readOnly: true })` and `ToolHandler` 
 
 **PATH-only CLI wrapper.** Rejected: the FlyBlue distribution is supposed to ship the engine.
 
-**Host-plane `ctx.codegraph` service.** Deferred: a consumer-only plugin avoids realm collisions and is enough for one read-only open cache per preset fiber.
+**Host-plane `ctx.codegraph` service.** Deferred for a shared read-only graph cache. User-triggered init is a separate host service (`ctx.codegraphIndex`); see [the index-manager note](2026-08-13-web-codegraph-index-manager.md).
 
-**Auto `codegraph init` from the agent.** Rejected: CodeGraph treats indexing as a user decision; an early `isError` or a surprise index teaches the wrong habit.
+**Auto `codegraph init` from the agent.** Rejected: CodeGraph treats indexing as a user decision; an early `isError` or a surprise index teaches the wrong habit. The Web GUI and `autoInit` setting may start init; the agent still must not.
 
 ## Consequences
 
-New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode gets `tools.codegraph_explore` from the same schema. Users still run `codegraph init` once per repo. Upgrading CodeGraph is a deliberate pin bump plus the contract test that `ToolHandler` / `isInitialized` still resolve.
+New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode gets `tools.codegraph_explore` from the same schema. Users decide when to create `.codegraph/`: the Web「代码索引」page, auto-init, or `codegraph init`. Upgrading CodeGraph is a deliberate pin bump plus the contract test that `ToolHandler` / `isInitialized` still resolve.
 
 ## Testing
 
@@ -36,5 +36,6 @@ New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode get
 
 ## Related
 
+- [Web host CodeGraph index manager](2026-08-13-web-codegraph-index-manager.md)
 - [Tool authoring](../../../../docs/cookbook/adding-a-tool.md)
 - CodeGraph MCP instructions live in the upstream `src/mcp/server-instructions.ts`; this package owns the DSH rewrite in `src/prompt.ts`.

@@ -14,6 +14,10 @@ The [model configuration guide](./providers.md) covers other providers and custo
 
 Click **Choose workspace**, add the project directory where you started `dsh`, and select it. The session composer remains unavailable until a workspace is selected.
 
+## Index the workspace
+
+A new blank session on an unindexed workspace shows **Initialize** / **Dismiss** above the composer. Initialize creates `.codegraph/` so `codegraph_explore` can answer structural questions. **Settings → Code index** can start init later and can turn on auto-init for future sessions. CLI and headless users still run `codegraph init` themselves.
+
 ## Run a task
 
 Start a session and send:

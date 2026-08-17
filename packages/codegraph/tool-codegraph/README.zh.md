@@ -6,7 +6,7 @@
 
 命名空间插件（`name` / `inject` / `Config` / `apply`，无 default 导出）。注入 `tools` 与 `systemPrompt`。
 
-注册不要求已有 `.codegraph/` 索引。缺少索引或引擎加载失败时，工具仍返回成功形态的指引，让模型改用 `read`/`grep`/`glob`。本插件从不执行 `codegraph init`。
+注册不要求已有 `.codegraph/` 索引。缺少索引或引擎加载失败时，工具仍返回成功形态的指引，让模型改用 `read`/`grep`/`glob`。本插件从不执行 `codegraph init`。Web GUI 与可选的自动 init 在 `@deepseek-ai/dsh-codegraph-index`，只由用户点击或 `autoInit` 设置启动。
 
 ## 工具
 
@@ -121,6 +121,6 @@ Call `codegraph_explore` before `read` or `grep` on indexed code. One call usual
 
 ## 已知限制与延期工作
 
-- **每个 workspace 仍需要 `.codegraph/` 索引** — harness 附带引擎和工具，不附带每个仓库的索引。建索引仍由用户执行 `codegraph init`。
+- **每个 workspace 仍需要 `.codegraph/` 索引** — harness 附带引擎和工具，不附带每个仓库的索引。建索引是用户的决定：Web「代码索引」页、自动 init，或 `codegraph init`。Agent 仍然不得自行 init。
 - **进程内 `ToolHandler` 是钉版本的内部导入** — `@colbymchenry/codegraph` 的公开入口导出 `CodeGraph` 但不导出 `ToolHandler`；本包从对应平台包的 `lib/dist/mcp/index.js` 加载 `ToolHandler`，并钉死 `1.5.0`。这些导出若移动，契约测试会失败。子进程路径运行包内的 `npm-shim.js`，由随包 Node 24 执行 CLI。
 - **没有 host 平面的图缓存** — 每个已挂载 preset fiber 持有自己的只读打开。共享的 `ctx.codegraph` 服务延期。

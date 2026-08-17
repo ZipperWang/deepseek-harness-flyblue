@@ -94,6 +94,10 @@
     - id: plugin-inventory
       name: '@deepseek-ai/dsh-host-plugin-inventory'
 
+    # Host-plane CodeGraph index manager (status / user init / optional auto-init).
+    - id: codegraph-index
+      name: '@deepseek-ai/dsh-codegraph-index'
+
     # The API gateway: the transport-agnostic dispatch face every client shape
     # shares. The base layer's agent-default-model service owns the default model.
     - id: api-gateway
@@ -240,6 +244,10 @@
     # Goal surface: GoalBar in the input dock over the goal session projection.
     - id: ui-goal
       name: '@deepseek-ai/dsh-client-ui-goal'
+
+    # CodeGraph index: settings page plus the blank-session dock prompt.
+    - id: ui-codegraph
+      name: '@deepseek-ai/dsh-client-ui-codegraph'
 
     # Per-message feedback: Like/Dislike plus an optional note in the
     # assistant-message action strip, over the messageFeedback Remote.

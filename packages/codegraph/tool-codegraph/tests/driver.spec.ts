@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   buildCliArgv,
+  buildInitArgv,
   createInProcessDriver,
   createSubprocessDriver,
   ENGINE_UNAVAILABLE_TEXT,
@@ -26,6 +27,12 @@ describe('resolveIsolation', () => {
     expect(nodeMajor()).toBe(Number.parseInt(process.versions.node.split('.')[0] ?? '0', 10))
     expect(nodeMajor('22.19.0')).toBe(22)
     expect(nodeMajor('')).toBe(0)
+  })
+})
+
+describe('buildInitArgv', () => {
+  it('emits the engine CLI init form', () => {
+    expect(buildInitArgv('/tmp/proj')).toEqual(['init', '/tmp/proj'])
   })
 })
 

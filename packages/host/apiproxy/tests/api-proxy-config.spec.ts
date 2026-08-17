@@ -445,6 +445,16 @@ describe('settings domain', () => {
       .toEqual({ default: 'minimal' })
   })
 
+  it('serves the codegraph namespace so the Web index page can persist auto-init', async () => {
+    const ctx = await harness()
+    ctx.settings.register(settingsNamespace('codegraph'), z.object({ autoInit: z.boolean().default(false) }))
+    const api = createApiProxy(ctx, DEFAULTS)
+
+    expectOk(await api.settings.update(request({ ns: 'codegraph', patch: { autoInit: true } })))
+    expect(ctx.settings.describe().find(view => String(view.ns) === 'codegraph')?.value)
+      .toEqual({ autoInit: true })
+  })
+
   it('refuses even a model-provider namespace once its directory entry is gone', async () => {
     const ctx = await harness({ configurableProviders: false })
     ctx.settings.register(NS, AdapterConfig)

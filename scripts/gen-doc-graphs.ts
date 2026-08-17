@@ -540,6 +540,14 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Provider registration and selection plus normalized query execution over exactly four operations; the seam offers no protocol escape hatch, so a backend translates into the normalized request and result.',
   },
   {
+    key: 'codegraphIndex',
+    pkg: 'codegraph-index',
+    title: 'Web host CodeGraph index lifecycle',
+    mode: 'core',
+    consumers: ['client-ui-codegraph'],
+    note: 'status and init read session.header.cwd and start codegraph init; the model-facing tool plugin never does.',
+  },
+  {
     key: 'apiProxy',
     pkg: 'apiproxy',
     title: 'Host API dispatch',

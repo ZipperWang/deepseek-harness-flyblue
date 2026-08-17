@@ -56,6 +56,16 @@ export function nodeMajor(version: string = process.versions.node): number {
 }
 
 /**
+ * Build CLI argv (after the script path) for `codegraph init [path]`.
+ * Host-plane index management calls this; the model-facing plugin never does.
+ * @param projectPath - absolute project root to index.
+ * @returns argv after the CLI script path.
+ */
+export function buildInitArgv(projectPath: string): string[] {
+  return ['init', projectPath]
+}
+
+/**
  * Build CLI argv (after the script path) for one MCP-named tool.
  * @param toolName - full tool name.
  * @param args - arguments including resolved `projectPath`.

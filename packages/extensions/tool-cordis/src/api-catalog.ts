@@ -416,6 +416,25 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'codegraphIndex',
+    summary: 'Host service (`ctx.codegraphIndex`) for user-triggered workspace indexing.',
+    description: 'Host service (`ctx.codegraphIndex`) for user-triggered workspace indexing.',
+    methods: [
+      {
+        signature: '@Remote(\'status\') status(sessionId: SessionId): CodegraphIndexStatus',
+        description: 'Read the current workspace index state for one live session. The path is always `session.header.cwd`; the client cannot name another root.',
+        parameters: [{ name: 'sessionId', description: 'live session identity.' }],
+        returns: 'the point-in-time status.',
+      },
+      {
+        signature: '@Remote(\'init\') init(sessionId: SessionId): CodegraphIndexStatus',
+        description: 'Start `codegraph init` for the session cwd and return immediately. A second call for the same resolved cwd joins the in-flight job.',
+        parameters: [{ name: 'sessionId', description: 'live session identity.' }],
+        returns: 'the status after the start attempt (often `indexing: true`).',
+      },
+    ],
+  },
+  {
     key: 'codeRuntime',
     summary: 'Registers one `ctx.codeRuntime` implementation.',
     description: 'Registers one `ctx.codeRuntime` implementation. Program, budget, abort, and substrate failures resolve in CodeRunResult; only Service Definition contract misuse rejects. Implementations bridge structured-cloneable bindings, materialize each declared namespace rejection class, treat programs as hostile peers, isolate runs from one another, and terminate and await in-flight runs during disposal.',
@@ -2756,6 +2775,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CodeDispatchLog',
     declaration: 'export interface CodeDispatchLog {\n    readonly exec: ToolExecution;\n    readonly agent?: Agent;\n    readonly subCallId: CallId;\n    readonly name: string;\n    readonly isError: boolean;\n    readonly content: ContentBlock[];\n}',
+  },
+  {
+    name: 'CodegraphIndexStatus',
+    declaration: 'export interface CodegraphIndexStatus {\n    readonly projectPath: string | null;\n    readonly indexed: boolean;\n    readonly indexing: boolean;\n    readonly error?: string;\n}',
   },
   {
     name: 'CodeJsonValue',

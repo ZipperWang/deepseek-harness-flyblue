@@ -13,6 +13,9 @@
     - button "Agent 预设":
       - img
       - text: Agent 预设
+    - button "代码索引":
+      - img
+      - text: 代码索引
   - button "打开配置文件"
   - button "关闭":
     - img

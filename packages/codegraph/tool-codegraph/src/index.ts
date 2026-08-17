@@ -44,6 +44,7 @@ export type {
 export { CODEGRAPH_PROMPT_TEXT } from './prompt.ts'
 export {
   buildCliArgv,
+  buildInitArgv,
   createInProcessDriver,
   createSubprocessDriver,
   ENGINE_UNAVAILABLE_TEXT,

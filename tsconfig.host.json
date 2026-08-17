@@ -58,6 +58,7 @@
     "apps/web/tests/agent-preset-authoring.e2e.ts",
     "apps/web/tests/shipped-composition.e2e.ts",
     "apps/web/tests/goal-bar.e2e.ts",
+    "apps/web/tests/codegraph-index.e2e.ts",
     "apps/web/tests/schedule-after.e2e.ts",
     "apps/web/tests/feedback-command.e2e.ts",
     "apps/web/tests/goal-command-presentation.e2e.ts",
@@ -294,6 +295,7 @@
     { "path": "./packages/lsp/lsp-stdio" },
     { "path": "./packages/lsp/tool-lsp" },
     { "path": "./packages/codegraph/tool-codegraph" },
+    { "path": "./packages/codegraph/codegraph-index" },
     { "path": "./apps/cli" }
   ]
 }

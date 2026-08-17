@@ -286,6 +286,7 @@ const subsystemGroups = [
     ['jobs.md', '后台任务', 'Background jobs'],
     ['filesystem.md', '文件系统', 'Filesystem'],
     ['lsp.md', 'LSP 导航', 'LSP navigation'],
+    ['codegraph.md', '代码索引', 'CodeGraph index'],
     ['code-runtime.md', '代码运行时', 'Code runtime'],
     ['web.md', 'Web 访问', 'Web access'],
     ['skills.md', '技能', 'Skills'],
