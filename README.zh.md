@@ -26,6 +26,8 @@ pnpm dsh web
 
 该命令会启动 Web UI，默认地址为 `http://127.0.0.1:3080`。详见 [Web UI 指南](docs/user/guide/index.md)。
 
+标准模式、PTC 模式和创造模式默认提供发行版附带的 [`@colbymchenry/codegraph`](https://www.npmjs.com/package/@colbymchenry/codegraph) 引擎上的 `codegraph_explore`。每个 workspace 仍需本地 `.codegraph/` 索引（在该仓库执行 `codegraph init`）；没有索引时工具仍会列出，并让 agent 改用普通文件工具。
+
 ## 社区与支持
 
 - 欢迎通过 [Issues](https://github.com/onefl666/deepseek-harness-flyblue/issues) 提交反馈或 bug 报告。

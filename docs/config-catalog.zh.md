@@ -2374,6 +2374,35 @@ export interface Config {
 
 来源：[`packages/shell/tool-bash-persistent/src/index.ts:405`](../packages/shell/tool-bash-persistent/src/index.ts)
 
+<a id="deepseek-aidsh-tool-codegraph"></a>
+
+## `@deepseek-ai/dsh-tool-codegraph`
+
+需要：`tools` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin configuration: extra tools, isolation, and the timeout budget. */
+export interface Config {
+  /**
+   * Extra short names to list besides `explore`. Empty by default because a
+   * single primary tool steers better than a menu of narrower ones.
+   */
+  extraTools?: string[]
+  /**
+   * How to run the bundled engine. `auto` uses in-process below Node 25 and a
+   * child process at Node 25+, where tree-sitter WASM can OOM the host.
+   */
+  isolation?: CodegraphIsolation
+  /** Tool-call timeout budget in ms (default 60000). */
+  timeoutMs?: number
+}
+
+/** Isolation mode for talking to the bundled CodeGraph engine. */
+export type CodegraphIsolation = 'auto' | 'in-process' | 'subprocess'
+```
+
+来源：[`packages/codegraph/tool-codegraph/src/index.ts:80`](../packages/codegraph/tool-codegraph/src/index.ts)
+
 <a id="deepseek-aidsh-tool-fs"></a>
 
 ## `@deepseek-ai/dsh-tool-fs`

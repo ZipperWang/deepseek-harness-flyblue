@@ -26,6 +26,8 @@ pnpm dsh web
 
 The command starts the Web UI, served at `http://127.0.0.1:3080` by default. See [Web UI guide](docs/user/guide/index.md).
 
+Standard, PTC, and Create modes include `codegraph_explore` from the bundled [`@colbymchenry/codegraph`](https://www.npmjs.com/package/@colbymchenry/codegraph) engine. Each workspace still needs a local `.codegraph/` index (`codegraph init` in that repo); without one the tool stays listed and tells the agent to use ordinary file tools.
+
 ## Community and support
 
 - Feel free to submit feedback or bug reports through [Issues](https://github.com/onefl666/deepseek-harness-flyblue/issues).

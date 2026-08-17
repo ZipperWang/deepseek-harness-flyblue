@@ -68,6 +68,12 @@
   config:
     sampleOverCapGlobResults: false
 
+# Semantic index over the bundled CodeGraph engine. Registers into the host
+# `tools` registry and provides nothing, so it needs no realm. A missing
+# `.codegraph/` index does not fail this row.
+- id: tool-codegraph
+  name: '@deepseek-ai/dsh-tool-codegraph'
+
 # ── background jobs ────────────────────────────────────────────────────────
 
 # Only the model-facing controls. The task REGISTRY stays on the host plane:
