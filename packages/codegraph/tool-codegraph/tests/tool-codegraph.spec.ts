@@ -9,6 +9,8 @@ import {
   CODEGRAPH_PROMPT_TEXT,
   codegraphIsConcurrencySafe,
   DEFAULT_CODEGRAPH_TOOL_TIMEOUT_MS,
+  EXPLORE_QUERY_DESCRIPTION,
+  EXPLORE_TOOL_DESCRIPTION,
 } from '@deepseek-ai/dsh-tool-codegraph'
 import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
 import type { CodegraphDriver } from '@deepseek-ai/dsh-tool-codegraph'
@@ -56,6 +58,11 @@ describe('tool-codegraph registration', () => {
   it('registers explore, the prompt section, and the default timeout', async () => {
     const { ctx } = await mount(stubDriver())
     expect(ctx.tools.get('codegraph_explore')?.timeoutMs).toBe(DEFAULT_CODEGRAPH_TOOL_TIMEOUT_MS)
+    const explore = ctx.tools.schemas().find(schema => schema.name === 'codegraph_explore')
+    expect(explore?.description).toBe(EXPLORE_TOOL_DESCRIPTION)
+    expect(
+      (explore?.parameters as { properties?: { query?: { description?: string } } }).properties?.query?.description,
+    ).toBe(EXPLORE_QUERY_DESCRIPTION)
     expect(ctx.tools.schemas().map(schema => schema.name)).toEqual(['codegraph_explore'])
     const prompt = await ctx.systemPrompt.assemble()
     expect(prompt.sections.find(section => section.name === 'tool:codegraph')?.text).toBe(CODEGRAPH_PROMPT_TEXT)

@@ -28,7 +28,7 @@ In-process dispatch uses `CodeGraph.open({ readOnly: true })` and `ToolHandler` 
 
 ## Consequences
 
-New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode gets `tools.codegraph_explore` from the same schema. Users decide when to create `.codegraph/`: the Web「代码索引」page, auto-init, or `codegraph init`. Upgrading CodeGraph is a deliberate pin bump plus the contract test that `ToolHandler` / `isInitialized` still resolve.
+New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode gets `tools.codegraph_explore` from the same schema. Users decide when to create `.codegraph/`: the Web「代码索引」page, auto-init, or `codegraph init`. Upgrading CodeGraph is a deliberate pin bump plus the contract test that `ToolHandler` / `isInitialized` still resolve. The `tool:codegraph` prompt and explore schema require unique-identifier queries; [the query contract](2026-08-17-codegraph-explore-query-contract.md) owns that wording.
 
 ## Testing
 
@@ -37,5 +37,6 @@ New sessions on 标准 / PTC / 创造 see `codegraph_explore`. PTC Code Mode get
 ## Related
 
 - [Web host CodeGraph index manager](2026-08-13-web-codegraph-index-manager.md)
+- [Explore query contract](2026-08-17-codegraph-explore-query-contract.md)
 - [Tool authoring](../../../../docs/cookbook/adding-a-tool.md)
 - CodeGraph MCP instructions live in the upstream `src/mcp/server-instructions.ts`; this package owns the DSH rewrite in `src/prompt.ts`.

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-12-flyblue-codegraph-tools.md
-2026-08-12-flyblue-codegraph-tools.md: badeb455d77803ddcd040fc8ef1f50f73b513ea4
-2026-08-12-flyblue-codegraph-tools.zh.md: 3148b0755f600c2f005cda60f307b7e8078181fc
+2026-08-12-flyblue-codegraph-tools.md: 2be1ab27bf53e2b9c0f2886e33aabcbb29723a9c
+2026-08-12-flyblue-codegraph-tools.zh.md: a4bdc35f6b876b4a616d1157bb734968e9f9ddb5

@@ -22,7 +22,11 @@ import { EXTRA_TOOLS, resolveExtraTools } from './extra-tools.ts'
 import { loadCodegraphBindings } from './load-bindings.ts'
 import { resolveProjectPath, sessionCwd } from './path.ts'
 import { presentCodegraphCall } from './present.ts'
-import { CODEGRAPH_PROMPT_TEXT } from './prompt.ts'
+import {
+  CODEGRAPH_PROMPT_TEXT,
+  EXPLORE_QUERY_DESCRIPTION,
+  EXPLORE_TOOL_DESCRIPTION,
+} from './prompt.ts'
 import { createSpawnRunner } from './spawn-runner.ts'
 import type {
   CodegraphDriver,
@@ -41,7 +45,11 @@ export type {
   CodegraphToolValue,
   OpenedCodegraph,
 } from './types.ts'
-export { CODEGRAPH_PROMPT_TEXT } from './prompt.ts'
+export {
+  CODEGRAPH_PROMPT_TEXT,
+  EXPLORE_QUERY_DESCRIPTION,
+  EXPLORE_TOOL_DESCRIPTION,
+} from './prompt.ts'
 export {
   buildCliArgv,
   buildInitArgv,
@@ -130,18 +138,12 @@ export function applyWithDriver(ctx: Context, config: ResolvedConfig, driver: Co
 
   ctx.tools.register(defineTool({
     name: 'codegraph_explore',
-    description:
-      'PRIMARY TOOL — call FIRST for almost any question OR before an edit: how does X work, architecture, a bug, '
-      + 'where/what is X, surveying an area, or the symbols you are about to change. Returns the verbatim source of '
-      + 'the relevant symbols grouped by file in ONE capped call (Read-equivalent — treat the shown source as already '
-      + 'Read; do NOT re-open those files), plus the call path among them. Query can be a natural-language question OR '
-      + 'a bag of symbol/file names. Usually the ONLY call you need.',
+    description: EXPLORE_TOOL_DESCRIPTION,
     parameters: {
       query: {
         type: 'string',
         required: true,
-        description:
-          'Symbol names, file names, or a short question (e.g. "AuthService loginUser", "how does X reach Y").',
+        description: EXPLORE_QUERY_DESCRIPTION,
       },
       maxFiles: {
         type: 'number',

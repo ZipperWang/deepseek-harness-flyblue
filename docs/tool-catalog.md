@@ -506,7 +506,7 @@ Not in any shipped tree (a deliberate opt-in — dynamic package code reaches th
 
 ### `codegraph_explore`
 
-PRIMARY TOOL — call FIRST for almost any question OR before an edit: how does X work, architecture, a bug, where/what is X, surveying an area, or the symbols you are about to change. Returns the verbatim source of the relevant symbols grouped by file in ONE capped call (Read-equivalent — treat the shown source as already Read; do NOT re-open those files), plus the call path among them. Query can be a natural-language question OR a bag of symbol/file names. Usually the ONLY call you need.
+PRIMARY TOOL — call first on indexed source: how a named symbol works, where it lives, how X reaches Y, or the symbols you will edit. Query is unique identifier names (a short "how X reaches Y" must still name both). Returns line-numbered source plus the call path. Treat shown source as already Read; do not re-open those files.
 
 ```json
 {
@@ -514,7 +514,7 @@ PRIMARY TOOL — call FIRST for almost any question OR before an edit: how does 
   "properties": {
     "query": {
       "type": "string",
-      "description": "Symbol names, file names, or a short question (e.g. \"AuthService loginUser\", \"how does X reach Y\")."
+      "description": "Unique symbol names that span the question, e.g. \"AuthService loginUser\" or \"how AuthService reaches markSession\". Not open prose, a lone path, or an existence check."
     },
     "maxFiles": {
       "type": "number",

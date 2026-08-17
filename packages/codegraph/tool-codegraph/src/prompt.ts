@@ -1,29 +1,35 @@
 /**
- * System-prompt guidance that steers the model to `codegraph_explore` before
- * file-by-file discovery. Adapted from CodeGraph's MCP initialize instructions
- * for this harness's tool names.
+ * Model-facing CodeGraph copy: the `tool:codegraph` section and the explore
+ * schema strings. Steers unique-identifier queries; open prose, a lone path,
+ * and existence checks fail open in the engine.
  * @module @deepseek-ai/dsh-tool-codegraph/prompt
  */
 
 /** Stable `tool:codegraph` section text (order 108). */
-export const CODEGRAPH_PROMPT_TEXT = `Codegraph is a local SQLite knowledge graph of symbols, edges, and files in the workspace. Use it BEFORE and while editing indexed source — one call returns verbatim line-numbered source plus call paths and blast radius.
+export const CODEGRAPH_PROMPT_TEXT = `Codegraph is a local SQLite symbol graph. Call \`codegraph_explore\` first on indexed source. Shown source is Read-equivalent (\`<n>\\t<line>\`), safe to \`edit\` — do not re-read those files or re-verify a clean hit with grep.
 
-## One tool: codegraph_explore — use it instead of reading files
+## Query
+- Unique identifiers: \`AuthService loginUser\`, not "how does auth work".
+- How X reaches Y: both unique names in one query (\`AuthService markSession\`).
+- Need more: call again with names from the hit; treat that source as already read.
+- Pass \`maxFiles\` when you already know the file and want a small dump.
 
-\`codegraph_explore\` is Read-equivalent. Pass a natural-language question or a bag of symbol/file names. It returns the verbatim source of the relevant symbols grouped by file (the same \`<n>\\t<line>\` shape \`read\` gives you, safe to \`edit\` from), plus the call path among them (including dynamic-dispatch hops grep cannot follow) and a blast-radius summary.
+## Do not
+- Open prose, a lone file path, or "does X exist" — those token-match (a path \`driver.ts\` hits every \`drive\`; a fake name still returns \`exists\` / \`Symbol\`).
+- A common verb alone (\`run\`, \`init\`, \`index\`) — pair it with a rare companion name.
+- Reconstruct a flow by hand when the call path already names the hops.
 
-Call \`codegraph_explore\` before \`read\` or \`grep\` on indexed code. One call usually answers the question. Do not reconstruct a flow by hand and do not re-verify codegraph results with grep.
+## Fallback
+- No \`.codegraph/\`: stop codegraph tools for this project; use read/grep/glob. Indexing is the user's decision (\`codegraph init\`); do not run it.
+- Use read/grep for configs, docs, and when the hit is token soup (unrelated files, Map methods, helpers). Source text is live from disk; blast-radius line numbers can lag a just-saved file by about one second.`
 
-## How to query
+/** Model-facing `codegraph_explore` tool description. */
+export const EXPLORE_TOOL_DESCRIPTION =
+  'PRIMARY TOOL — call first on indexed source: how a named symbol works, where it lives, how X reaches Y, or the symbols you will edit. '
+  + 'Query is unique identifier names (a short "how X reaches Y" must still name both). '
+  + 'Returns line-numbered source plus the call path. Treat shown source as already Read; do not re-open those files.'
 
-- Almost any question — how X works, architecture, a bug, where/what is X, or surveying an area — \`codegraph_explore\` with the relevant names or a short question.
-- How X reaches Y — name the symbols that span the flow in one query.
-- Reading or editing a file/symbol you can name — put that name or path in the query.
-- Need more? Call \`codegraph_explore\` again with more specific names and treat the returned source as already read.
-
-## Limitations
-
-- If a result says the project is not indexed (no \`.codegraph/\`), stop calling codegraph tools for that project for the rest of the session and use \`read\`/\`grep\`/\`glob\` there instead. Indexing is the user's decision — mention they can run \`codegraph init\` if it comes up, but do not run it yourself.
-- The index lags file writes by about one second.
-- Cross-file resolution is best-effort name matching; ambiguous calls may return multiple candidates.
-- Reserve \`read\`/\`grep\` for configs, docs, or a specific detail codegraph did not cover.`
+/** Model-facing `query` parameter description. */
+export const EXPLORE_QUERY_DESCRIPTION =
+  'Unique symbol names that span the question, e.g. "AuthService loginUser" or "how AuthService reaches markSession". '
+  + 'Not open prose, a lone path, or an existence check.'
