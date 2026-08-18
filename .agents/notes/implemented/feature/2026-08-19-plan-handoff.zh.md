@@ -12,7 +12,7 @@ Status: implemented
 
 `@deepseek-ai/dsh-plan-handoff` 是已交付的 plan 插件。它保留 `ctx.planMode`、`plan/mode`、`/plan` 和 `exit_plan_mode`。审阅提供三个离开标签——`Approve and execute`、`Approve and compact context`、`Approve and keep context`——外加 `Refine plan`。`plan-review` 的 `AskUserQuestionIntent` 用 `approve: string[]` 点名这些离开标签。Web 卡片渲染每条批准路径和 refine；通用问题流仍是回退。
 
-源 agent 空闲后，保留上下文会把完整计划 steer 进本会话；压缩和清空会先结束当前轮次，避免模型对着规划对话再走一步。压缩通过 `AgentPresets.serviceFor(agent, 'compaction')` 或宿主 `ctx.compaction` 解析该会话的引擎——已交付 preset 会 isolate `compaction`，因此 `agent.ctx.get('compaction')` 看不到它——然后 `compactNow` 再 steer（取消则不 steer；失败或找不到引擎则保留上下文）。清空会创建相同 cwd、模型和 preset 的兄弟会话，在源会话记录 `plan/handoff`，并把计划 steer 进子会话。没有 `ctx.agents.create` 的宿主把清空当作压缩后再执行。Web 的 `SessionManager` 在当前会话上看到实时 `plan/handoff` 时选中子会话，或在该子会话稍后进入列表时选中。`plan/mode`、`plan/handoff` 和 `plan/approved` 声明在包的 `types`/`client` 面上，这样导入该出口的 Client 程序能在 `SessionEventMap` 上看到它们。
+源 agent 空闲后，保留上下文会把完整计划 steer 进本会话；压缩和清空会先结束当前轮次，避免模型对着规划对话再走一步。压缩通过 `AgentPresets.serviceFor(agent, 'compaction')` 或宿主 `ctx.compaction` 解析该会话的引擎——已交付 preset 会 isolate `compaction`，因此 `agent.ctx.get('compaction')` 看不到它——然后 `compactNow` 再 steer（取消则不 steer；失败或找不到引擎则保留上下文）。Chat 视图把这次空闲 `compactNow` 当成独立压缩：`compaction/start`（`turn === null`、无 `sourceCommandId`）立刻渲染「正在压缩…」，替换落地后同一节点变成完成检查点。轮次内自动压缩仍只在检查点出现。插件在 `compactNow` 返回前不 steer，也不为进行中行另写会话事件。清空会创建相同 cwd、模型和 preset 的兄弟会话，在源会话记录 `plan/handoff`，并把计划 steer 进子会话。没有 `ctx.agents.create` 的宿主把清空当作压缩后再执行。Web 的 `SessionManager` 在当前会话上看到实时 `plan/handoff` 时选中子会话，或在该子会话稍后进入列表时选中。`plan/mode`、`plan/handoff` 和 `plan/approved` 声明在包的 `types`/`client` 面上，这样导入该出口的 Client 程序能在 `SessionEventMap` 上看到它们。
 
 计划 markdown 留在工具参数中，并复制进执行提示。没有计划文件，也没有写拦截。
 
@@ -32,4 +32,4 @@ Status: implemented
 
 ## Testing
 
-包测试覆盖原先的 plan-mode 状态机，以及 keep/compact/clear 空闲交接、宿主平面与 isolate preset 的压缩查找、`serviceFor` 未发布的 isolate 引擎、压缩取消、无工厂时的清空回退。`user-questions` 与 `ui-user-questions` 钉住 `approve: string[]` 和四按钮卡片。`SessionManager` 在实时 `plan/handoff` 之后选中已列入的子会话。
+包测试覆盖原先的 plan-mode 状态机，以及 keep/compact/clear 空闲交接、宿主平面与 isolate preset 的压缩查找、`serviceFor` 未发布的 isolate 引擎、压缩取消、无工厂时的清空回退。`user-questions` 与 `ui-user-questions` 钉住 `approve: string[]` 和四按钮卡片。`SessionManager` 在实时 `plan/handoff` 之后选中已列入的子会话。Conversation-node 测试钉住独立 `compaction/start` `{ turn: null }` 的进行中行、检查点落地后同一 key 的完成标记、轮次内自动压缩与无检查点的失败 `compaction/end` 不渲染，以及带 `sourceCommandId` 的事件仍归 `manual-compaction`。Chat-view 测试钉住「正在压缩…」。无密钥 Web seed 在已关闭轮次后只追加这条独立 start，钉住英文页的 `Compacting context…`。完整「压缩后执行」浏览器旅程仍需要带密钥录制真实 LLM 摘要。

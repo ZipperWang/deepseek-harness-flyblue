@@ -17,7 +17,8 @@ import { turnErrorDefinition } from '../src/client/conversation-nodes/turn-error
 import { turnMaxTokensDefinition } from '../src/client/conversation-nodes/turn-max-tokens.ts'
 import { turnTailDefinition } from '../src/client/conversation-nodes/turn-tail.ts'
 import type {
-  AssistantChatData, ManualCompactionChatData, RetryChatData, ToolChatData, TurnTailChatData,
+  AssistantChatData, CompactionChatData, ManualCompactionChatData, RetryChatData, ToolChatData,
+  TurnTailChatData,
 } from '../src/client/contract/chat-nodes.ts'
 
 const DEFINITIONS: readonly ConversationNodeDefinition[] = [
@@ -718,6 +719,78 @@ describe('built-in conversation node Definitions', () => {
     ], true)
 
     expect(node(snapshot(value), 'compaction')).toBeUndefined()
+  })
+
+  it('renders a standalone compactNow start as a running node until the checkpoint lands', () => {
+    const value = assembler([
+      at(20, 'compaction/start', { compactionId: 'standalone-1', turn: null }),
+    ])
+    const running = node(snapshot(value), 'compaction')
+    expect(running?.data).toEqual({
+      kind: 'compaction',
+      phase: 'running',
+      seq: 20,
+      time: 1_700_000_000_020,
+    })
+    expect(running?.anchorSeq).toBe(20)
+
+    value.append(at(21, 'compaction/summary', {
+      compactionId: 'standalone-1',
+      summary: [{ type: 'text', text: 'standalone summary' }],
+      shadowedSeqs: [1, 2],
+      shadowedTokenCount: 80,
+    }))
+    value.append(at(22, 'user/message', {
+      ...textMessage('standalone-checkpoint', 'checkpoint'),
+      source: { kind: 'plugin', plugin: 'compact', compactionId: 'standalone-1' },
+    }, { surfaceOp: { op: 'replace', start: 1, end: 2 } }))
+    value.flush()
+
+    const completed = node(snapshot(value), 'compaction')
+    expect(completed?.key).toBe(running?.key)
+    expect(completed?.data).toMatchObject({
+      summary: 'standalone summary',
+      summaryEventSeq: 21,
+      shadowedItemCount: 2,
+      shadowedTokenCount: 80,
+    })
+    expect((completed?.data as CompactionChatData)).not.toHaveProperty('phase')
+  })
+
+  it('does not render in-turn automatic compaction or a failed standalone end before a checkpoint', () => {
+    const inTurn = assembler([
+      at(20, 'compaction/start', { compactionId: 'in-turn-1', turn: 1 }),
+    ])
+    expect(node(snapshot(inTurn), 'compaction')).toBeUndefined()
+
+    const failed = assembler([
+      at(20, 'compaction/start', { compactionId: 'failed-1', turn: null }),
+      at(21, 'compaction/end', {
+        compactionId: 'failed-1',
+        turn: null,
+        error: 'This operation was aborted',
+      }),
+    ])
+    expect(node(snapshot(failed), 'compaction')).toBeUndefined()
+  })
+
+  it('keeps command-correlated compaction events on the manual-compaction node', () => {
+    const value = assembler([
+      at(10, 'command/run', {
+        commandId: 'command-running',
+        name: 'compact',
+        source: { kind: 'user' },
+      }),
+      at(11, 'compaction/start', {
+        compactionId: 'manual-running',
+        sourceCommandId: 'command-running',
+        turn: null,
+      }),
+    ])
+    expect(node(snapshot(value), 'compaction')).toBeUndefined()
+    const manual = node(snapshot(value), 'manual-compaction')
+    expect((manual?.data as ManualCompactionChatData).command.name).toBe('compact')
+    expect((manual?.data as ManualCompactionChatData).compaction).toBeNull()
   })
 
   it('ignores legacy retry and code-dispatch events without correlation ids', () => {

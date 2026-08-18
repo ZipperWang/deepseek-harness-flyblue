@@ -15,7 +15,29 @@ import {
   MarkdownText,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ChatViewSlotProps } from '../contract/slots.ts'
+import a11yCss from './accessibility.module.css'
 import css from './MessageItem.module.css'
+
+/**
+ * Non-expandable standalone compactNow row while the summary is still running.
+ * @param props - the owning view's locale seat.
+ * @returns the running compaction status row.
+ */
+export function CompactionRunningRow({ t }: { readonly t: ChatViewSlotProps['t'] }) {
+  return (
+    <div className={css.compactionRow} data-state="running">
+      <span className={a11yCss.visuallyHidden}>{t('row.running')}</span>
+      <div className={css.compactionStatus}>
+        <span className={css.compactionLeading} aria-hidden>
+          <span className={css.compactionContextIcon} data-compaction-icon="context">
+            <IconApiOutline14 />
+          </span>
+        </span>
+        <span className={css.compactionTitle}>{t('message.compaction.running')}</span>
+      </div>
+    </div>
+  )
+}
 
 interface CompactionItemProps {
   node: CompactionSummaryNode

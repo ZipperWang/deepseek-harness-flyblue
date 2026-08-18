@@ -263,7 +263,7 @@ Chat `order` 的结构性变化仍可能重排当前可见 key；纯 data 更新
 | Assistant / `assistant-step` | `turn:step` | `step/start` | `assistant/chunk`、final `assistant/message`、同 step Retry | 聚合 blocks、usage、首 token 时间、final 和 retry 隐藏状态，并发布同 key Step data |
 | Tool / `tool-call` | root call ID | root `tool/call` | root result、Code Dispatch start/result | 聚合 root、children 和 parent Map；Dispatch Event 用 `rootCallId` 精确路由 |
 | Command / `command` | command ID | `command/run` | `command/done`、带 source command ID 的 compact lifecycle/checkpoint | 聚合 command outcome 和手动压缩证据 |
-| Automatic Compaction / `compaction` | compaction ID | 无 source command ID 的 `compaction/start` | summary、end、replacement checkpoint | 聚合 summary/checkpoint；checkpoint 足够时可在缺 start 下 fallback |
+| Automatic Compaction / `compaction` | compaction ID | 无 source command ID 的 `compaction/start` | summary、end、replacement checkpoint | 聚合 start/end/summary/checkpoint；独立 `turn === null` 且无 end 时渲染进行中行；checkpoint 足够时可在缺 start 下 fallback |
 | Retry / `model-retry` | retry ID | attempt 1 的 `llm/retry` | 后续 `llm/retry` 与 `llm/retry-started` | 聚合同一 RetryId 的 attempts 与 scheduled/started 状态 |
 | Turn Error / `turn-error` | turn number | `turn/start` | error `turn/end` 与该 turn Retry Events | 聚合 terminal failure，并用 Retry 证据决定隐藏 |
 | Turn Tail / `turn-tail` | turn number | `turn/start` | Assistant、Retry、`step/end`、`turn/end` | 保存 turn end，读取各 Step 的 Assistant data，发布 Turn data；完整 Matches 用于选择视觉尾部 anchor |
@@ -279,7 +279,7 @@ Chat `order` 的结构性变化仍可能重排当前可见 key；纯 data 更新
 | Assistant | chunk 为 RAF，final immediate，纯 usage/finish 为 none | 同 key `assistant-step`，状态为 running/settled/interrupted | 缺 `step/start` 可先用 Matches fallback；Location close 生成中断表现 |
 | Tool | 默认 immediate | 一个递归 `tool-call` root，包含全部 `subCalls` | result-only 历史窗口可 fallback；running→settled 保持 key |
 | Command | 默认 immediate | 普通 `command` 或集成 `manual-compaction` | checkpoint 到达可改变 anchor，但不改变 Context key |
-| Compaction | 默认 immediate | `compaction` marker | checkpoint 可先展示，older 补 start 后正序 replay |
+| Compaction | 默认 immediate | `compaction` marker，含独立进行中行 | 独立 `turn === null` 的 start 立刻渲染；checkpoint 可先展示，older 补 start 后正序 replay |
 | Retry | 默认 immediate | 一个 `model-retry` Node 内含 attempts | 多次 retry 更新同一 key；Location close 把最后 scheduled 表现为 cancelled |
 | Turn Error | 默认 immediate | `turn-error` visible/hidden | 缺 start 可从 error end fallback；Retry 到达后保留 key 并隐藏 |
 | Turn Tail | 仅 `turn/end` immediate，其余 none | 独立 `turn-tail` footer | 从 Step Assistant data 计算 closing/metrics，并通过同 turn Matches 决定 anchor |

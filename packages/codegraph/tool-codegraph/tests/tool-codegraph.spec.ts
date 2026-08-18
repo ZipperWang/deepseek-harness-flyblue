@@ -45,13 +45,19 @@ async function mount(
   return { ctx, call }
 }
 
+function textOf(result: ToolExecutionResult): string {
+  const block = result.content[0]
+  return block !== undefined && block.type === 'text' ? block.text : ''
+}
+
 function stubDriver(execute: CodegraphDriver['execute'] = async () => ({
   text: 'graph body',
   isError: false,
   indexed: true,
 })): CodegraphDriver & { execute: ReturnType<typeof vi.fn> } {
   const fn = vi.fn(execute)
-  return { execute: fn, dispose: vi.fn() }
+  const dispose = vi.fn()
+  return { execute: fn, dispose }
 }
 
 describe('tool-codegraph registration', () => {
@@ -86,15 +92,21 @@ describe('tool-codegraph registration', () => {
     const ctx = new Context()
     await ctx.plugin(SystemPrompt)
     await ctx.plugin(ToolRuntime)
-    expect(() => applyWithDriver(ctx, {
-      extraTools: [],
-      isolation: 'auto',
-      timeoutMs: 0,
-    }, stubDriver())).toThrow(`tool-codegraph: timeoutMs must be an integer between 1 and ${MAX_TIMER_DELAY_MS}`)
+    expect(() => {
+      applyWithDriver(ctx, {
+        extraTools: [],
+        isolation: 'auto',
+        timeoutMs: 0,
+      }, stubDriver())
+    }).toThrow(`tool-codegraph: timeoutMs must be an integer between 1 and ${MAX_TIMER_DELAY_MS}`)
   })
 
   it('disposes the driver when the plugin fiber is disposed', async () => {
-    const driver = stubDriver()
+    const dispose = vi.fn()
+    const driver: CodegraphDriver = {
+      execute: async () => ({ text: 'graph body', isError: false, indexed: true }),
+      dispose,
+    }
     const ctx = new Context()
     await ctx.plugin(SystemPrompt)
     await ctx.plugin(ToolRuntime)
@@ -104,7 +116,7 @@ describe('tool-codegraph registration', () => {
       timeoutMs: DEFAULT_CODEGRAPH_TOOL_TIMEOUT_MS,
     }, driver)
     await ctx.fiber.dispose()
-    expect(driver.dispose).toHaveBeenCalledOnce()
+    expect(dispose).toHaveBeenCalledOnce()
   })
 })
 
@@ -137,11 +149,11 @@ describe('codegraph_explore execution', () => {
     const { call } = await mount(stubDriver())
     const missing = await call('codegraph_explore', { query: 'x' }, null)
     expect(missing.isError).toBe(true)
-    expect(missing.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining('session workspace cwd') })
+    expect(textOf(missing)).toContain('session workspace cwd')
 
     const escaped = await call('codegraph_explore', { query: 'x', projectPath: '..' })
     expect(escaped.isError).toBe(true)
-    expect(escaped.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining('stay inside') })
+    expect(textOf(escaped)).toContain('stay inside')
   })
 
   it('keeps an unindexed result successful and throws engine isError', async () => {
@@ -155,7 +167,7 @@ describe('codegraph_explore execution', () => {
     const { call: callFailing } = await mount(failing)
     const refused = await callFailing('codegraph_explore', { query: 'x' })
     expect(refused.isError).toBe(true)
-    expect(refused.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining('refused') })
+    expect(textOf(refused)).toContain('refused')
   })
 
   it('presents a search card titled by the query', async () => {

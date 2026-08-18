@@ -39,10 +39,10 @@ export function createSpawnRunner(
         })
         const stdout: Buffer[] = []
         const stderr: Buffer[] = []
-        child.stdout?.on('data', (chunk: Buffer) => {
+        child.stdout.on('data', (chunk: Buffer) => {
           stdout.push(chunk)
         })
-        child.stderr?.on('data', (chunk: Buffer) => {
+        child.stderr.on('data', (chunk: Buffer) => {
           stderr.push(chunk)
         })
         child.on('error', reject)

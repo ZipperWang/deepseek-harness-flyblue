@@ -1,33 +1,38 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type {
-  CompactionSummaryNode, ConversationMatch, ConversationNodeContext, ConversationNodeDefinition,
+  ConversationMatch, ConversationNodeContext, ConversationNodeDefinition,
 } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-compaction/types'
+import type { CompactionChatData } from '../contract/chat-nodes.ts'
 import { chatNode } from './common.ts'
-import { compactSource, compactSummary, updateCompactionState } from './command.ts'
+import { compactSource, compactSummary, compactionEvidence, updateCompactionState } from './command.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
   interface ChatNodeDataMap {
-    /** Automatic compaction checkpoint marker. */
-    compaction: CompactionSummaryNode
+    /** Automatic or standalone compactNow checkpoint, including the standalone running row. */
+    compaction: CompactionChatData
   }
 }
 
 interface CompactionState {
+  readonly start?: ConversationMatch
   readonly summary?: ConversationMatch
   readonly checkpoint?: ConversationMatch
+  readonly end?: ConversationMatch
 }
 
 function fallbackState(context: ConversationNodeContext<CompactionState>): CompactionState {
-  const summary = context.matches.find(match => match.event.type === 'compaction/summary')
-  const checkpoint = context.matches.find(match => compactSource(match.event) !== undefined)
-  return {
-    ...summary === undefined ? {} : { summary },
-    ...checkpoint === undefined ? {} : { checkpoint },
-  }
+  return compactionEvidence(context.matches)
 }
 
-/** Automatic compaction lifecycle and landed checkpoint Definition. */
+function standaloneRunning(state: CompactionState): ConversationMatch | undefined {
+  const start = state.start
+  if (start === undefined || start.event.type !== 'compaction/start') return undefined
+  if (start.event.data.turn !== null || state.end !== undefined) return undefined
+  return start
+}
+
+/** Standalone compactNow running row and landed checkpoint Definition. */
 export const compactionDefinition: ConversationNodeDefinition<CompactionState> = {
   kind: 'compaction',
   target: 'chat',
@@ -46,13 +51,22 @@ export const compactionDefinition: ConversationNodeDefinition<CompactionState> =
     }
     return null
   },
-  start: () => ({}),
+  start: (_context, match) => updateCompactionState({}, match),
   update: (context, match) => updateCompactionState(context.state, match),
   buildViewNode: (context) => {
     const state = context.state ?? fallbackState(context)
-    if (state.checkpoint === undefined) return null
-    const marker = compactSummary(state.summary, state.checkpoint)
-    return chatNode(context, 'compaction', marker.seq, marker)
+    if (state.checkpoint !== undefined) {
+      const marker = compactSummary(state.summary, state.checkpoint)
+      return chatNode(context, 'compaction', marker.seq, marker)
+    }
+    const start = standaloneRunning(state)
+    if (start === undefined) return null
+    return chatNode(context, 'compaction', start.event.seq, {
+      kind: 'compaction',
+      phase: 'running',
+      seq: start.event.seq,
+      time: start.event.time,
+    })
   },
 }
 

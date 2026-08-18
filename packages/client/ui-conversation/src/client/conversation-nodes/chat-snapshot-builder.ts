@@ -6,7 +6,7 @@ import type {
   PartialAssistant, RunningToolCall,
 } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ChatNode } from '../contract/chat-nodes.ts'
-import { isRunningTool } from '../contract/chat-nodes.ts'
+import { isRunningCompaction, isRunningTool } from '../contract/chat-nodes.ts'
 
 const EMPTY_KEYS: readonly string[] = []
 const EMPTY_TURNS: readonly number[] = []
@@ -163,11 +163,14 @@ function legacyContribution(raw: ChatConversationViewNode): LegacyContribution {
     case 'steering':
     case 'context':
     case 'command':
-    case 'compaction':
     case 'turn-error':
     case 'turn-max-tokens':
     case 'unknown':
       return { anchorSeq: node.anchorSeq, nodes: [node.data], partial: null, running: null }
+    case 'compaction':
+      return isRunningCompaction(node.data)
+        ? EMPTY_CONTRIBUTION
+        : { anchorSeq: node.anchorSeq, nodes: [node.data], partial: null, running: null }
     case 'assistant-step': {
       const data = node.data
       if (data.status === 'running') {

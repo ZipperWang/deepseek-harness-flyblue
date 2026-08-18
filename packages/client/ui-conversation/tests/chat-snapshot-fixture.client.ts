@@ -4,7 +4,10 @@ import type {
   ConversationTurnDataMap, LegacyConversationSlice, PartialAssistant, RunningToolCall,
   ToolCallBlock, TurnLocation,
 } from '@deepseek-ai/dsh-client-runtime/client'
+import { isRunningCompaction, type RunningCompactionChatData } from '../src/client/contract/chat-nodes.ts'
 import { deriveTurnMetrics } from '../src/client/chat/turn-metrics.ts'
+
+type FixtureNode = ConversationNode | RunningCompactionChatData
 
 const EMPTY: readonly never[] = []
 
@@ -104,7 +107,7 @@ function assistantData(node: AssistantMessageNode) {
 }
 
 function settledNode(
-  node: ConversationNode,
+  node: FixtureNode,
   turns: ReadonlyMap<number, TurnLocation>,
 ): ChatConversationViewNode {
   const turn = 'turn' in node && typeof node.turn === 'number' ? turns.get(node.turn) : undefined
@@ -132,14 +135,17 @@ function settledNode(
 
 /** Build the canonical Chat fixture corresponding to one legacy test slice. */
 export function chatSnapshotFixture(input: {
-  readonly nodes?: readonly ConversationNode[]
+  readonly nodes?: readonly FixtureNode[]
   readonly partial?: PartialAssistant | null
   readonly runningCalls?: readonly RunningToolCall[]
   readonly turnTimings?: LegacyConversationSlice['turnTimings']
   readonly turnEnds?: LegacyConversationSlice['turnEnds']
 } = {}, previous?: ChatSnapshot): ChatSnapshot {
+  const legacyNodes = (input.nodes ?? EMPTY).filter(
+    (candidate): candidate is ConversationNode => !isRunningCompaction(candidate),
+  )
   const legacy: LegacyConversationSlice = {
-    nodes: input.nodes ?? EMPTY,
+    nodes: legacyNodes,
     partial: input.partial ?? null,
     runningCalls: input.runningCalls ?? EMPTY,
     turnTimings: input.turnTimings ?? new Map(),
@@ -172,7 +178,8 @@ export function chatSnapshotFixture(input: {
     })
   }
   const linkedCompactions = new Set<CompactionSummaryNode>()
-  const nodes = legacy.nodes.flatMap((node): ChatConversationViewNode[] => {
+  const nodes = (input.nodes ?? EMPTY).flatMap((node): ChatConversationViewNode[] => {
+    if (isRunningCompaction(node)) return [settledNode(node, turns)]
     if (node.kind === 'command' && node.name === 'compact') {
       const sourceSeq = node.outcome?.kind === 'success' ? node.outcome.sourceEventSeq : undefined
       const candidates = sourceSeq === undefined

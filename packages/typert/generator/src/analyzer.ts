@@ -1238,7 +1238,7 @@ class FaceAnalyzer {
         } else {
           const exportName = stringLiteralValue(first)
           if (exportName === undefined || !isRemoteSegment(exportName)) {
-            this.fail(first ?? expression, 'Remote() name must be a string literal containing only RPC endpoint segment characters')
+            this.fail(first, 'Remote() name must be a string literal containing only RPC endpoint segment characters')
           }
           const options = expression.arguments[1]
           if (options !== undefined) {

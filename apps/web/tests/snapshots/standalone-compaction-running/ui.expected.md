@@ -1,0 +1,29 @@
+- banner:
+  - navigation "Session hierarchy":
+    - button "Standalone compaction running" [disabled]
+  - button "Session log":
+    - text: Session log
+    - img
+  - tablist:
+    - tab "Chat" [selected]
+    - tab "Trajectory"
+- text: Plan a small change and stop. {{clock}}
+- button "Copy":
+  - img
+- paragraph: PLAN_DONE
+- button "Copy":
+  - img
+- button "Good response":
+  - img
+- button "Bad response":
+  - img
+- button "Branch into a new conversation":
+  - img
+- text: {{clock}} Ran for {{duration}} Running Compacting context…
+- textbox "Message the agent"
+- button "Commands":
+  - img
+- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
+- button "Send message" [disabled]
+- text: 1 turns · 1 steps LLM {{duration}}

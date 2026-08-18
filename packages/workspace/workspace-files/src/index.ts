@@ -153,7 +153,7 @@ export class WorkspaceFilesService extends TypertRemoteService {
     if (name === '' || name === '.' || name === '..' || /[\\/]/.test(name)) throw new Error('workspace-files: invalid name')
     const source = await this.resolveExisting(workspaceId, path)
     const target = resolve(dirname(source), name)
-    await this.assertInside(await this.root(workspaceId), target)
+    this.assertInside(await this.root(workspaceId), target)
     await rename(source, target)
   }
 
@@ -205,14 +205,14 @@ export class WorkspaceFilesService extends TypertRemoteService {
     const root = await this.root(workspaceId)
     const target = await this.resolveRelative(root, path)
     const parent = await realpath(dirname(target))
-    await this.assertInside(root, parent)
+    this.assertInside(root, parent)
     return target
   }
 
   private async resolveRelative(root: string, path: string): Promise<string> {
     if (path === '' || path.split(/[\\/]/).includes('.git')) throw new Error('workspace-files: invalid relative path')
     const target = resolve(root, path)
-    await this.assertInside(root, target)
+    this.assertInside(root, target)
     const pieces = relative(root, target).split(sep)
     let current = root
     for (const piece of pieces) {
@@ -229,14 +229,14 @@ export class WorkspaceFilesService extends TypertRemoteService {
     return target
   }
 
-  private async assertInside(root: string, target: string): Promise<void> {
+  private assertInside(root: string, target: string): void {
     const rel = relative(root, target)
     if (rel === '' || rel.startsWith(`..${sep}`) || rel === '..' || resolve(root, rel) !== target) throw new Error('workspace-files: path escapes workspace')
   }
 
   /** Reject a Windows junction or any other reparse point that resolves outside the workspace. */
   private async assertRealInside(root: string, target: string): Promise<void> {
-    await this.assertInside(root, await realpath(target))
+    this.assertInside(root, await realpath(target))
   }
 }
 

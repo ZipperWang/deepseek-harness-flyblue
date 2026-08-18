@@ -20,7 +20,7 @@ surface 顺序还让另外两个问题成为结构性的。一次替换之后它
 
 标记的摘要文本、被替换条目数量和估算的被遮蔽 token 数量都来自检查点引用的 `compaction/summary` 事件，绝不取自成框的检查点载荷——那是为模型撰写的指令信封。窗口切分把该事件留在窗口外时这些字段不可用，与无调用的工具结果同一种软退让；后续补上该事件的分页会解析出它们。
 
-[手动压缩命令](../feature/2026-07-30-queued-manual-compaction.md)会把摘要事件的 seq 作为成功结果的 `CommandResult.sourceEventSeq` 返回，`command/done` 则持久化这项可选引用。Chat 只会配对成功且名称为 `/compact`、其引用恰好等于唯一一个已加载 `CompactionSummaryNode.summaryEventSeq` 的命令。运行中的命令先渲染为 `compact · Compacting context…`；检查点落地后，同一个 React key 会在检查点的消息流位置渲染一条收起的 `compact` 展开项，并显示条目数量和 token 估算值。输入被拒绝、没有可压缩历史、取消和失败时仍使用通用命令行，并保留处理器撰写的完整文本。自动压缩没有命令引用，继续使用独立的上下文已压缩标记。
+[手动压缩命令](../feature/2026-07-30-queued-manual-compaction.md)会把摘要事件的 seq 作为成功结果的 `CommandResult.sourceEventSeq` 返回，`command/done` 则持久化这项可选引用。Chat 只会配对成功且名称为 `/compact`、其引用恰好等于唯一一个已加载 `CompactionSummaryNode.summaryEventSeq` 的命令。运行中的命令先渲染为 `compact · Compacting context…`；检查点落地后，同一个 React key 会在检查点的消息流位置渲染一条收起的 `compact` 展开项，并显示条目数量和 token 估算值。输入被拒绝、没有可压缩历史、取消和失败时仍使用通用命令行，并保留处理器撰写的完整文本。独立 `compactNow`（无 `sourceCommandId`、`turn === null`）从 `compaction/start` 起使用同一句进行中文案，检查点落地后保持该节点 key。轮次内自动压缩没有命令引用，仍只在检查点出现。
 
 显式事件引用之所以重要，是因为手动压缩允许在异步摘要运行期间注入持久上下文：命令行与检查点行不保证相邻。命令生命周期事件增加一个可选字段，但压缩事务、RPC 信封和模型可见 surface 均不变化；不含该字段的预发布持久日志继续采用原先的两行软退让，无须迁移。
 

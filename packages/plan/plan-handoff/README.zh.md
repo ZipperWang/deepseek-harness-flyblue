@@ -17,7 +17,7 @@
 `exit_plan_mode` 在两种状态下都保持注册。在 plan mode 中，它要求以 `#` 标题开头的 markdown 计划，并通过 `ctx.userQuestions` 提供四个选项：
 
 - `Approve and execute` — 结束当前轮次，源 agent 空闲后创建兄弟会话（相同 cwd、模型与 preset），挂到同一 workspace，记录 `plan/handoff`，并把完整计划 steer 进子会话。
-- `Approve and compact context` — 结束当前轮次，对本会话 `compactNow`，再 steer 完整计划。压缩服务通过 `AgentPresets.serviceFor(agent, 'compaction')`（已交付 preset 的 isolate realm）或宿主 `ctx.compaction` 解析。取消则不 steer。失败或找不到引擎则回退为保留上下文。
+- `Approve and compact context` — 结束当前轮次，对本会话 `compactNow`，再 steer 完整计划。Chat 视图从独立 `compaction/start` 起显示「正在压缩…」，检查点落地后插件才 steer。压缩服务通过 `AgentPresets.serviceFor(agent, 'compaction')`（已交付 preset 的 isolate realm）或宿主 `ctx.compaction` 解析。取消则不 steer。失败或找不到引擎则回退为保留上下文。
 - `Approve and keep context` — 把完整计划 steer 进本会话。
 - `Refine plan` — 留在 plan mode；反馈作为失败调用返回。
 
@@ -44,7 +44,14 @@ Web 客户端在当前会话上看到实时 `plan/handoff` 时选中子会话；
 
 #### What the model sees
 
-Plan mode 激活时，模型在提示词顺序 50 处看到部署的精确 `section` 文本；未激活时不贡献文本。
+Plan mode 激活时，模型在提示词顺序 50 处把部署的精确 `section` 文本作为 `plan:policy` 段落看到；未激活时不贡献文本。
+
+##### Plan policy
+
+```markdown
+You are in plan mode. Explore and write a decision-complete execution spec
+through exit_plan_mode.
+```
 
 #### Token effect
 

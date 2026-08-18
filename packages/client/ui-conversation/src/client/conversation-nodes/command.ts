@@ -23,15 +23,15 @@ type CommandId = CommandNode['commandId']
 
 const COMPACT_PLUGIN: CompactionCheckpointSource['plugin'] = 'compact'
 
-interface CommandState {
-  readonly command: CommandNode
+interface CompactionEvidence {
+  readonly start?: ConversationMatch
   readonly summary?: ConversationMatch
   readonly checkpoint?: ConversationMatch
+  readonly end?: ConversationMatch
 }
 
-interface CompactionEvidence {
-  readonly summary?: ConversationMatch
-  readonly checkpoint?: ConversationMatch
+interface CommandState extends CompactionEvidence {
+  readonly command: CommandNode
 }
 
 function commandFromRun(match: ConversationMatch): CommandNode {
@@ -132,18 +132,37 @@ function compactSummary(match: ConversationMatch | undefined, checkpoint: Conver
   }
 }
 
+/**
+ * Recover shared compaction lifecycle Matches from a Context window.
+ * @param matches - currently loaded Matches for one compaction Context.
+ * @returns start, summary, checkpoint, and end Matches when present.
+ */
+function compactionEvidence(matches: readonly ConversationMatch[]): CompactionEvidence {
+  const start = matches.find(match => match.event.type === 'compaction/start')
+  const summary = matches.find(match => match.event.type === 'compaction/summary')
+  const checkpoint = matches.find(match => compactSource(match.event) !== undefined)
+  const end = matches.find(match => match.event.type === 'compaction/end')
+  return {
+    ...start === undefined ? {} : { start },
+    ...summary === undefined ? {} : { summary },
+    ...checkpoint === undefined ? {} : { checkpoint },
+    ...end === undefined ? {} : { end },
+  }
+}
+
 function fallbackState(context: ConversationNodeContext<CommandState>): CommandState | undefined {
   const done = context.matches.find(match => match.event.type === 'command/done')
-  const checkpoint = context.matches.find(match => compactSource(match.event) !== undefined)
-  const summary = context.matches.find(match => match.event.type === 'compaction/summary')
-  if (checkpoint === undefined) return done === undefined ? undefined : { command: commandFromDone(done) }
-  const source = compactSource(checkpoint.event)
-  if (source?.sourceCommandId === undefined) return done === undefined ? undefined : { command: commandFromDone(done) }
+  const evidence = compactionEvidence(context.matches)
+  if (evidence.checkpoint === undefined) return done === undefined ? undefined : { command: commandFromDone(done), ...evidence }
+  const source = compactSource(evidence.checkpoint.event)
+  if (source?.sourceCommandId === undefined) {
+    return done === undefined ? undefined : { command: commandFromDone(done), ...evidence }
+  }
   const fallbackCommand = done === undefined
     ? {
       kind: 'command' as const,
-      seq: checkpoint.event.seq,
-      time: checkpoint.event.time,
+      seq: evidence.checkpoint.event.seq,
+      time: evidence.checkpoint.event.time,
       commandId: source.sourceCommandId,
       name: 'compact',
       args: null,
@@ -152,8 +171,7 @@ function fallbackState(context: ConversationNodeContext<CommandState>): CommandS
     : { ...commandFromDone(done), name: 'compact' }
   return {
     command: fallbackCommand,
-    checkpoint,
-    ...summary === undefined ? {} : { summary },
+    ...evidence,
   }
 }
 
@@ -167,7 +185,9 @@ export function updateCompactionState<State extends CompactionEvidence>(
   state: State,
   match: ConversationMatch,
 ): State {
+  if (match.event.type === 'compaction/start') return { ...state, start: match }
   if (match.event.type === 'compaction/summary') return { ...state, summary: match }
+  if (match.event.type === 'compaction/end') return { ...state, end: match }
   if (compactSource(match.event) !== undefined) return { ...state, checkpoint: match }
   return state
 }
@@ -226,4 +246,4 @@ export function registerCommandConversationNode(ctx: Context): void {
 }
 
 /** Shared structural checkpoint recognizer for automatic compaction. */
-export { compactSource, compactSummary }
+export { compactSource, compactSummary, compactionEvidence }

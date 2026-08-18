@@ -39,7 +39,8 @@
   padding: 2px 0;
 }
 
-.compactionButton {
+.compactionButton,
+.compactionStatus {
   display: flex;
   align-items: center;
   width: 100%;

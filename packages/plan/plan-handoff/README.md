@@ -17,7 +17,7 @@ An approved review also appends `plan/approved` `{ execution, title }`. A clear 
 `exit_plan_mode` stays registered in both states. In plan mode it requires a markdown plan starting with a `#` heading and asks through `ctx.userQuestions` with four options:
 
 - `Approve and execute` — conclude the current turn, then after the source agent is idle, create a sibling session (same cwd, model, and preset), attach it to the same workspace, log `plan/handoff`, and steer the full plan into the child.
-- `Approve and compact context` — conclude the current turn, then `compactNow` on this session, then steer the full plan. Compaction is resolved through `AgentPresets.serviceFor(agent, 'compaction')` (the shipped isolated preset realm) or host `ctx.compaction`. Cancellation skips the steer. Failure or a missing engine falls back to keep.
+- `Approve and compact context` — conclude the current turn, then `compactNow` on this session, then steer the full plan. The Chat view shows `Compacting context…` from the standalone `compaction/start` until the checkpoint lands; only then does the plugin steer. Compaction is resolved through `AgentPresets.serviceFor(agent, 'compaction')` (the shipped isolated preset realm) or host `ctx.compaction`. Cancellation skips the steer. Failure or a missing engine falls back to keep.
 - `Approve and keep context` — steer the full plan into this session.
 - `Refine plan` — stay in plan mode; feedback returns as a failed call.
 
@@ -44,7 +44,14 @@ The Web client selects the child when it sees a live `plan/handoff` on the curre
 
 #### What the model sees
 
-While plan mode is active, the model sees the deployment's exact `section` text at prompt order 50; inactive mode contributes no text.
+While plan mode is active, the model sees the deployment's exact `section` text as the `plan:policy` section at prompt order 50; inactive mode contributes no text.
+
+##### Plan policy
+
+```markdown
+You are in plan mode. Explore and write a decision-complete execution spec
+through exit_plan_mode.
+```
 
 #### Token effect
 

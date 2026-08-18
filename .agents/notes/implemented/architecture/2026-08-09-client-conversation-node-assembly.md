@@ -263,7 +263,7 @@ Page size, the number of history loads, and RAF coalescing affect only when evid
 | Assistant / `assistant-step` | `turn:step` | `step/start` | `assistant/chunk`, final `assistant/message`, and same-step Retry | Aggregate blocks, usage, first-token time, final evidence, and retry-hidden state, then publish same-key Step data |
 | Tool / `tool-call` | Root call ID | Root `tool/call` | Root result and Code Dispatch start/result | Aggregate the root, children, and parent Map; Dispatch Events route exactly through `rootCallId` |
 | Command / `command` | Command ID | `command/run` | `command/done` and compact lifecycle/checkpoint Events carrying a source command ID | Aggregate command outcome and manual-compaction evidence |
-| Automatic Compaction / `compaction` | Compaction ID | `compaction/start` without a source command ID | Summary, end, and replacement checkpoint | Aggregate summary/checkpoint; sufficient checkpoint evidence supports fallback without a start |
+| Automatic Compaction / `compaction` | Compaction ID | `compaction/start` without a source command ID | Summary, end, and replacement checkpoint | Aggregate start/end/summary/checkpoint; a standalone `turn === null` start without an end renders the running row; a checkpoint still supports fallback without a start |
 | Retry / `model-retry` | Retry ID | Attempt 1 `llm/retry` | Later `llm/retry` and `llm/retry-started` | Aggregate one RetryId's attempts and scheduled/started state |
 | Turn Error / `turn-error` | Turn number | `turn/start` | Error `turn/end` and Retry Events for that Turn | Aggregate terminal failure and use Retry evidence to decide hiding |
 | Turn Tail / `turn-tail` | Turn number | `turn/start` | Assistant, Retry, `step/end`, and `turn/end` | Retain turn end, read each Step's Assistant data, and publish Turn data; use complete Matches to choose the visual tail anchor |
@@ -279,7 +279,7 @@ Page size, the number of history loads, and RAF coalescing affect only when evid
 | Assistant | RAF for chunks, immediate for final, none for pure usage/finish | Same-key `assistant-step` with running/settled/interrupted status | Matches support fallback without `step/start`; Location close produces interruption presentation |
 | Tool | Immediate by default | One recursive `tool-call` root containing all `subCalls` | A result-only history window supports fallback; running→settled retains its key |
 | Command | Immediate by default | Ordinary `command` or integrated `manual-compaction` | Checkpoint arrival may change the anchor without changing the Context key |
-| Compaction | Immediate by default | `compaction` marker | A checkpoint may render before start; an older start triggers forward replay |
+| Compaction | Immediate by default | `compaction` marker, including the standalone running row | A standalone `turn === null` start renders immediately; a checkpoint may render before start; an older start triggers forward replay |
 | Retry | Immediate by default | One `model-retry` Node containing all attempts | Multiple retries update one key; Location close presents the last scheduled attempt as cancelled |
 | Turn Error | Immediate by default | Visible or hidden `turn-error` | Error end supports fallback without start; later Retry keeps the key and hides it |
 | Turn Tail | Immediate only for `turn/end`; otherwise none | Independent `turn-tail` footer | Compute closing/metrics from Step Assistant data and use same-turn Matches to choose the anchor |

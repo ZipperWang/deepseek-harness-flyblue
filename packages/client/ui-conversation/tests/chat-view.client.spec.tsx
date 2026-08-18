@@ -17,7 +17,8 @@ import {
 } from '@deepseek-ai/dsh-client-runtime/client'
 import { RpcId } from '@deepseek-ai/dsh-client-connection/client'
 import type {
-  ChatNode, ChatNodeOwnerProps, ChatNodeViewProps, ChatViewSlotProps, SelectionTarget, UseChatNodeTurnData,
+  ChatNode, ChatNodeOwnerProps, ChatNodeViewProps, ChatViewSlotProps, RunningCompactionChatData,
+  SelectionTarget, UseChatNodeTurnData,
 } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
@@ -1292,6 +1293,28 @@ describe('ChatView', () => {
     const ov = render(<orphan.ChatView {...orphan.props} />)
     expect(ov.getByText('命令')).toBeTruthy()
     expect(ov.getByText('已完成')).toBeTruthy()
+  })
+
+  it('renders standalone compactNow as a running row that becomes the completed marker', () => {
+    const running: RunningCompactionChatData = {
+      kind: 'compaction',
+      phase: 'running',
+      seq: 8,
+      time: 8_000,
+    }
+    const h = makeHarness({ chat: chatSnapshotFixture({ nodes: [running] }) })
+    const view = render(<h.ChatView {...h.props} />)
+    expect(view.getByText('正在压缩…')).toBeTruthy()
+    expect(view.queryByText('上下文已压缩')).toBeNull()
+    expect(view.queryByRole('button', { name: /上下文已压缩/ })).toBeNull()
+
+    act(() => {
+      h.set({ nodes: [compaction()] })
+    })
+
+    expect(view.queryByText('正在压缩…')).toBeNull()
+    expect(view.getByText('已压缩 16 条历史记录（约 11309 tokens）')).toBeTruthy()
+    expect(view.getByRole('button', { name: /上下文已压缩/ })).toBeTruthy()
   })
 
   it('renders /compact as one stateful disclosure from running through completion', () => {

@@ -44,6 +44,29 @@ export interface ManualCompactionChatData {
   readonly compaction: CompactionSummaryNode | null
 }
 
+/**
+ * Standalone compactNow in progress: `compaction/start` with `turn === null`
+ * and no checkpoint yet. In-turn automatic compaction never uses this payload.
+ */
+export interface RunningCompactionChatData {
+  readonly kind: 'compaction'
+  readonly phase: 'running'
+  readonly seq: number
+  readonly time: number
+}
+
+/** Landed checkpoint or standalone running row for the compaction Chat Node. */
+export type CompactionChatData = CompactionSummaryNode | RunningCompactionChatData
+
+/**
+ * Test whether a compaction Chat payload is the standalone running row.
+ * @param data - compaction Chat Node data or a fixture Conversation Node.
+ * @returns whether the payload is still waiting on a checkpoint.
+ */
+export function isRunningCompaction(data: object): data is RunningCompactionChatData {
+  return 'phase' in data && (data as { readonly phase?: unknown }).phase === 'running'
+}
+
 /** One durable retry chain rendered as a single row. */
 export interface RetryChatData {
   readonly attempts: readonly ModelRetryNode[]

@@ -303,7 +303,7 @@ function mark(
   table.set(method, Object.freeze(marker))
 }
 
-function validateAuthority(authority: RemoteOptions['authority']): void {
+function validateAuthority(authority: unknown): void {
   if (authority !== undefined && authority !== 'trusted-host' && authority !== 'loopback') {
     throw new TypeError('typert-protocol: Remote authority must be trusted-host or loopback')
   }

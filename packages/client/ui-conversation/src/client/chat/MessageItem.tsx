@@ -1,7 +1,8 @@
 // MessageItem: simple chat nodes — user and consumed-steering bubbles
 // (right-aligned, with clock + copy IconActions; branch lives only under
 // assistant answers), pending steering (copy only), context injection,
-// compaction marker, retry disclosure, and unknown-surface JSON rows.
+// compaction marker (including the standalone running row), retry
+// disclosure, and unknown-surface JSON rows.
 
 import { memo, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -11,8 +12,9 @@ import type {
 import { JsonBlock, MessageText, StateDot } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ChatNodeViewProps, ChatViewSlotProps } from '../contract/slots.ts'
 import { ImageGallery, type ImageLoader } from '@deepseek-ai/dsh-client-ui-attachment'
+import { isRunningCompaction } from '../contract/chat-nodes.ts'
 import { messageImageLabels } from '../image-labels.ts'
-import { CompactionItem } from './CompactionItem.tsx'
+import { CompactionItem, CompactionRunningRow } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
 import css from './MessageItem.module.css'
@@ -271,9 +273,11 @@ export const ContextMessageNodeView = memo(function ContextMessageNodeView({ nod
   )
 })
 
-/** Automatic compaction keyed Chat renderer. */
+/** Automatic or standalone compactNow keyed Chat renderer. */
 export const CompactionNodeView = memo(function CompactionNodeView({ node, t }: ChatNodeViewProps<'compaction'>) {
-  return <CompactionItem node={node.data} t={t} />
+  return isRunningCompaction(node.data)
+    ? <CompactionRunningRow t={t} />
+    : <CompactionItem node={node.data} t={t} />
 })
 
 /** Correlated retry-chain keyed Chat renderer. */

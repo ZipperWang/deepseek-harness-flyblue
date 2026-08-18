@@ -37,7 +37,7 @@ export function approvedPlanPrompt(input: {
     ? 'History is usable; if it conflicts with the plan below, the plan is authoritative.\n\n'
     : 'This turn has no planning conversation. Execute solely from the plan below.\n\n'
   return (
-    `${history}`
+    history
     + 'Read the approved plan before any edit. Then execute it top-to-bottom with full tool access. '
     + 'Verify each step before the next. Do not re-plan or ask for another approval.\n\n'
     + input.plan
