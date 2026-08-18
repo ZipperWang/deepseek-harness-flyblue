@@ -73,6 +73,10 @@ describe('web e2e: local usage history dashboard', () => {
     await compareOrRefreshGolden(THIRTY_EXPECTED, thirty, MODE)
     await section.getByRole('button', { name: '最近 7 天' }).click()
     await expect.poll(() => section.getByRole('button', { name: '最近 7 天' }).getAttribute('aria-pressed'), { timeout: 10_000 }).toBe('true')
+    // SegmentedRange commits aria-pressed before the range reload settles;
+    // wait for the 7-day KPI so captureStableAria does not snapshot the
+    // still-updating 30-day dashboard.
+    await expect.poll(() => section.getByText('2 / 7').count(), { timeout: 10_000 }).toBe(1)
     const seven = await captureStableAria(page, '[data-usage-stats]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(SEVEN_EXPECTED, seven, MODE)
     await page.evaluate(() => { document.body.setAttribute('data-ds-dark-theme', '') })

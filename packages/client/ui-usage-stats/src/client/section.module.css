@@ -3,14 +3,11 @@
 .title, .panel h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
 .panel h3 { font-size: 14px; line-height: 22px; }
 .intro, .panel p, .status, .footer { margin: 2px 0 0; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; }
-.refresh, .range button, .error button { min-height: 30px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); cursor: pointer; font: inherit; }
+.refresh, .error button { min-height: 30px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); cursor: pointer; font: inherit; }
 .refresh { flex: none; padding: 4px 10px; }
 .refresh:disabled { cursor: default; opacity: .6; }
-.refresh:hover:not(:disabled), .range button:hover, .error button:hover { background: var(--dsw-alias-interactive-bg-hover); }
-.refresh:focus-visible, .range button:focus-visible, .error button:focus-visible, .heatmap li:focus-visible, .bars li:focus-visible, summary:focus-visible { outline: 2px solid var(--dsw-alias-state-business-primary); outline-offset: 2px; }
-.range { align-self: flex-start; display: flex; padding: 2px; border-radius: 10px; background: var(--dsw-alias-bg-layer-1); }
-.range button { min-width: 76px; border: none; background: none; }
-.range .rangeSelected { background: var(--dsw-alias-bg-layer-2); box-shadow: var(--dsw-shadow-lv1); }
+.refresh:hover:not(:disabled), .error button:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.refresh:focus-visible, .error button:focus-visible, .heatmap li:focus-visible, .bars li:focus-visible, summary:focus-visible { outline: 2px solid var(--dsw-alias-state-business-primary); outline-offset: 2px; }
 .error { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px solid var(--dsw-alias-state-error-primary); border-radius: 10px; color: var(--dsw-alias-state-error-primary); font-size: 12px; }
 .error button { padding: 2px 8px; color: inherit; }
 .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }

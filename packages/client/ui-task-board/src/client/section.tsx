@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import {
   Button, IconArchiveOutline20, IconChecklistOutline14, IconEditOutline16, IconLoadingOutline16,
-  IconPlusOutline16, IconRefreshOutline16, Input,
+  IconPlusOutline16, IconRefreshOutline16, Input, SegmentedRange,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
@@ -185,10 +185,16 @@ export function TaskBoardSection({ t, list, create, archive, update, remove }: P
           {t('create')}
         </Button>
       </form>
-      <div className={css.range} aria-label={t('title')}>
-        <button type="button" aria-pressed={tab === 'active'} onClick={() => { setTab('active') }}>{t('tab.active')}</button>
-        <button type="button" aria-pressed={tab === 'archived'} onClick={() => { setTab('archived') }}>{t('tab.archived')}</button>
-      </div>
+      <SegmentedRange
+        aria-label={t('title')}
+        value={tab}
+        minWidth="88px"
+        options={[
+          { value: 'active', label: t('tab.active') },
+          { value: 'archived', label: t('tab.archived') },
+        ]}
+        onChange={setTab}
+      />
       {firstLoad
         ? <div className={css.skeleton} aria-busy="true" aria-label={t('loading')}><div className={css.skeletonRow} /><div className={css.skeletonRow} /><div className={css.skeletonRow} /></div>
         : visible.length === 0

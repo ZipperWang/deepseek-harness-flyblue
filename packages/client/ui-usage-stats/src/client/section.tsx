@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { SegmentedRange } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, InjectFace } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import css from './section.module.css'
@@ -118,9 +119,15 @@ export function UsageStatsSection({ t, stats }: PropsLocale<'usageStats'> & Inje
         <div><h2 className={css.title}>{t('title')}</h2><p className={css.intro}>{t('intro')}</p></div>
         <button type="button" className={css.refresh} disabled={busy} onClick={() => { load(requestedDays) }}>{busy ? t('refreshing') : t('refresh')}</button>
       </header>
-      <div className={css.range} aria-label={t('range.label')}>
-        {([7, 30] as const).map(days => <button key={days} type="button" aria-pressed={requestedDays === days} className={requestedDays === days ? css.rangeSelected : undefined} onClick={() => { selectDays(days) }}>{t(days === 7 ? 'range.7' : 'range.30')}</button>)}
-      </div>
+      <SegmentedRange
+        aria-label={t('range.label')}
+        value={requestedDays}
+        options={[
+          { value: 7, label: t('range.7') },
+          { value: 30, label: t('range.30') },
+        ]}
+        onChange={selectDays}
+      />
       {busy && snapshot !== undefined && <p className={css.status} role="status">{t('updating')}</p>}
       {error !== undefined && <div className={css.error} role="alert"><span>{t('error')}: {error}</span><button type="button" onClick={retry}>{t('retry')}</button></div>}
       {snapshot === undefined ? <div className={css.empty}>{t('error.empty')}</div> : <>

@@ -1,0 +1,62 @@
+.track {
+  --segment-min-width: 76px;
+  --thumb-x: 0px;
+  --thumb-w: 0px;
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.thumb {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  z-index: 0;
+  height: calc(100% - 4px);
+  width: var(--thumb-w);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2);
+  box-shadow: var(--dsw-shadow-lv1);
+  transform: translateX(var(--thumb-x));
+  pointer-events: none;
+}
+
+.thumb[data-ready] {
+  transition:
+    transform var(--ds-transition-duration) var(--ds-ease-in-out),
+    width var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.track button {
+  position: relative;
+  z-index: 1;
+  min-width: var(--segment-min-width);
+  min-height: 30px;
+  padding: 4px 14px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.track button:hover:not([aria-pressed='true']) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.track button:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb[data-ready] {
+    transition: none;
+  }
+}

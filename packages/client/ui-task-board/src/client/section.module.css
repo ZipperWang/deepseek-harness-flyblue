@@ -77,43 +77,6 @@
   min-width: 0;
 }
 
-.range {
-  align-self: flex-start;
-  display: flex;
-  padding: 2px;
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-layer-1);
-}
-
-.range button {
-  min-width: 88px;
-  min-height: 30px;
-  padding: 4px 14px;
-  border: none;
-  border-radius: 8px;
-  background: none;
-  color: var(--dsw-alias-label-primary);
-  font: inherit;
-  font-size: 13px;
-  line-height: 20px;
-  cursor: pointer;
-  transition: background-color 120ms var(--ds-ease-in-out), box-shadow 120ms var(--ds-ease-in-out);
-}
-
-.range button:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-
-.range button[aria-pressed='true'] {
-  background: var(--dsw-alias-bg-layer-2);
-  box-shadow: var(--dsw-shadow-lv1);
-}
-
-.range button:focus-visible {
-  outline: 2px solid var(--dsw-alias-state-business-primary);
-  outline-offset: 2px;
-}
-
 .list {
   display: flex;
   flex-direction: column;

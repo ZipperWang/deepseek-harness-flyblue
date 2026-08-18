@@ -3179,6 +3179,9 @@ importers:
       '@deepseek-ai/dsh-client-runtime':
         specifier: workspace:^
         version: link:../runtime
+      '@deepseek-ai/dsh-client-ui-primitives':
+        specifier: workspace:^
+        version: link:../ui-primitives
       '@deepseek-ai/dsh-client-ui-settings':
         specifier: workspace:^
         version: link:../ui-settings
