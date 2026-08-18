@@ -1229,12 +1229,24 @@ class FaceAnalyzer {
         marker = { kind: 'direct' }
       } else if (ts.isCallExpression(expression)
         && this.isTypeMetaSymbol(expression.expression, 'Remote')) {
-        if (expression.arguments.length !== 1) this.fail(expression, 'Remote() requires one exported method name')
-        const exportName = stringLiteralValue(expression.arguments[0])
-        if (exportName === undefined || !isRemoteSegment(exportName)) {
-          this.fail(expression.arguments[0] ?? expression, 'Remote() name must be a string literal containing only RPC endpoint segment characters')
+        const first = expression.arguments[0]
+        if (first === undefined || expression.arguments.length > 2) this.fail(expression, 'Remote() requires options or one exported method name and options')
+        if (ts.isObjectLiteralExpression(first)) {
+          if (expression.arguments.length !== 1) this.fail(expression, 'Remote(options) accepts exactly one argument')
+          this.remoteOptions(first)
+          marker = { kind: 'direct' }
+        } else {
+          const exportName = stringLiteralValue(first)
+          if (exportName === undefined || !isRemoteSegment(exportName)) {
+            this.fail(first ?? expression, 'Remote() name must be a string literal containing only RPC endpoint segment characters')
+          }
+          const options = expression.arguments[1]
+          if (options !== undefined) {
+            if (!ts.isObjectLiteralExpression(options)) this.fail(options, 'Remote() options must be an object literal')
+            this.remoteOptions(options)
+          }
+          marker = { kind: 'direct', exportName }
         }
-        marker = { kind: 'direct', exportName }
       } else if (ts.isCallExpression(expression)
         && this.isTypeMetaSymbol(expression.expression, 'RemoteScope')) {
         if (expression.arguments.length < 1 || expression.arguments.length > 2) {
@@ -1257,6 +1269,19 @@ class FaceAnalyzer {
       found = marker
     }
     return found
+  }
+
+  /** Validate transport metadata while keeping generated client calls authority-neutral. */
+  private remoteOptions(options: ts.ObjectLiteralExpression): void {
+    for (const property of options.properties) {
+      if (!ts.isPropertyAssignment(property) || memberName(property.name) !== 'authority') {
+        this.fail(property, 'Remote() options only support authority')
+      }
+      const authority = stringLiteralValue(property.initializer)
+      if (authority !== 'trusted-host' && authority !== 'loopback') {
+        this.fail(property.initializer, 'Remote() authority must be trusted-host or loopback')
+      }
+    }
   }
 
   private remoteResultType(method: ts.MethodDeclaration): ts.TypeNode {

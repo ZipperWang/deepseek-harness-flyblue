@@ -84,6 +84,21 @@
     - id: session-stats
       name: '@deepseek-ai/dsh-session-stats'
 
+    - id: usage-stats
+      name: '@deepseek-ai/dsh-usage-stats'
+
+    - id: task-board
+      name: '@deepseek-ai/dsh-task-board'
+
+    - id: workspace-git
+      name: '@deepseek-ai/dsh-workspace-git'
+
+    - id: workspace-files
+      name: '@deepseek-ai/dsh-workspace-files'
+
+    - id: ssh
+      name: '@deepseek-ai/dsh-ssh'
+
     # Resolve bind host, SSH launch, and display once at boot, then mount the
     # matching dual-face directory picker. Mount -native or -browse directly in
     # an overlay to pin the interaction.
@@ -252,6 +267,21 @@
     # CodeGraph index: settings page plus the blank-session dock prompt.
     - id: ui-codegraph
       name: '@deepseek-ai/dsh-client-ui-codegraph'
+
+    - id: ui-usage-stats
+      name: '@deepseek-ai/dsh-client-ui-usage-stats'
+
+    - id: ui-task-board
+      name: '@deepseek-ai/dsh-client-ui-task-board'
+
+    - id: ui-git-graph
+      name: '@deepseek-ai/dsh-client-ui-git-graph'
+
+    - id: ui-workspace-inspector
+      name: '@deepseek-ai/dsh-client-ui-workspace-inspector'
+
+    - id: ui-ssh
+      name: '@deepseek-ai/dsh-client-ui-ssh'
 
     # Per-message feedback: Like/Dislike plus an optional note in the
     # assistant-message action strip, over the messageFeedback Remote.

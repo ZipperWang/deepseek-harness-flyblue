@@ -16,7 +16,9 @@ export type {
   ConnectionRpcEndpointMatcher,
   ConnectionRpcHandler,
   ConnectionRpcHandlerOptions,
+  ConnectionHttpOptions,
   HostConnectionHandle,
+  HostConnectionHttp,
   HostConnectionRpc,
 } from './rpc.ts'
 export { HostConnectionService } from './rpc-host.ts'

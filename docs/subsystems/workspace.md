@@ -149,6 +149,141 @@ abstract capability(): DirectoryPickerCapability
 
 Source: [`packages/host/directory-picker/src/index.ts:131`](../../packages/host/directory-picker/src/index.ts)
 
+<a id="ctxworkspacefiles--workspacefilesservice"></a>
+
+### `ctx.workspaceFiles` — `WorkspaceFilesService`
+
+Host service for ID-scoped file tree, preview, search, and mutations.
+
+```ts cordis-catalog
+/**
+ * List immediate children of one workspace-relative directory.
+ * @param workspaceId - Registered workspace whose root authorizes the read.
+ * @param path - Workspace-relative directory, or an empty string for the root.
+ * @returns Direct children with stable metadata ordering.
+ */
+@Remote({ authority: 'loopback' }) async tree(workspaceId: WorkspaceId, path: string): Promise<WorkspaceFileEntry[]>
+
+/**
+ * Read a bounded UTF-8 preview. Binary data is served only through a raw loopback route.
+ * @param workspaceId - Registered workspace whose root authorizes the read.
+ * @param path - Workspace-relative file path.
+ * @returns Text preview and the version token required for a subsequent save.
+ */
+@Remote({ authority: 'loopback' }) async preview(workspaceId: WorkspaceId, path: string): Promise<WorkspaceFilePreview>
+
+/**
+ * Save text only when the browser's version token still matches disk.
+ * @param workspaceId - Registered workspace whose root authorizes the write.
+ * @param path - Workspace-relative file path.
+ * @param content - Complete UTF-8 replacement text.
+ * @param version - Version returned by the latest preview.
+ * @returns The saved file's current preview and replacement version token.
+ */
+@Remote({ authority: 'loopback' }) async save(workspaceId: WorkspaceId, path: string, content: string, version: FileVersion): Promise<WorkspaceFilePreview>
+
+/**
+ * Search names without following links or walking Git internals.
+ * @param workspaceId - Registered workspace whose root authorizes the search.
+ * @param query - Case-insensitive filename fragment.
+ * @returns Matching entries up to the configured result and scan limits.
+ */
+@Remote({ authority: 'loopback' }) async search(workspaceId: WorkspaceId, query: string): Promise<WorkspaceFileEntry[]>
+
+/**
+ * Rename a relative path after an explicit destructive confirmation.
+ * @param workspaceId - Registered workspace whose root authorizes the mutation.
+ * @param path - Existing workspace-relative source path.
+ * @param name - Replacement basename without path separators.
+ * @param confirmed - Explicit confirmation required before the rename.
+ */
+@Remote({ authority: 'loopback' }) async rename(workspaceId: WorkspaceId, path: string, name: string, confirmed: boolean): Promise<void>
+
+/**
+ * Create an empty file, refusing to overwrite an existing path.
+ * @param workspaceId - Registered workspace whose root authorizes the mutation.
+ * @param path - New workspace-relative file path.
+ */
+@Remote({ authority: 'loopback' }) async create(workspaceId: WorkspaceId, path: string): Promise<void>
+
+/**
+ * Delete a path only after an explicit confirmation.
+ * @param workspaceId - Registered workspace whose root authorizes the mutation.
+ * @param path - Existing workspace-relative path to remove.
+ * @param confirmed - Explicit confirmation required before deletion.
+ */
+@Remote({ authority: 'loopback' }) async remove(workspaceId: WorkspaceId, path: string, confirmed: boolean): Promise<void>
+```
+
+Source: [`packages/workspace/workspace-files/src/index.ts:45`](../../packages/workspace/workspace-files/src/index.ts)
+
+<a id="ctxworkspacegit--workspacegitservice"></a>
+
+### `ctx.workspaceGit` — `WorkspaceGitService`
+
+Host service for the shared Git state used by graph and file-change panels.
+
+```ts cordis-catalog
+/**
+ * Read working-tree status.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @returns Porcelain status entries for index and working-tree changes.
+ */
+@Remote({ authority: 'loopback' }) async status(workspaceId: WorkspaceId): Promise<GitStatusEntry[]>
+
+/**
+ * List local branches and the current branch.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @returns Local branch names and the current branch when attached.
+ */
+@Remote({ authority: 'loopback' }) async branches(workspaceId: WorkspaceId): Promise<{ current: string | null; branches: string[] }>
+
+/**
+ * Read a bounded commit graph without exposing arbitrary process execution.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @returns Commit rows up to the configured graph limit.
+ */
+@Remote({ authority: 'loopback' }) async graph(workspaceId: WorkspaceId): Promise<GitGraphEntry[]>
+
+/**
+ * Create a branch at the current HEAD.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @param name - New local branch name interpreted by Git.
+ */
+@Remote({ authority: 'loopback' }) createBranch(workspaceId: WorkspaceId, name: string): Promise<void>
+
+/**
+ * Switch only when no merge/rebase/cherry-pick is active and the tree is clean.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @param name - Existing local branch name.
+ */
+@Remote({ authority: 'loopback' }) async switchBranch(workspaceId: WorkspaceId, name: string): Promise<void>
+
+/**
+ * Stage one workspace-relative path.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @param path - Workspace-relative path passed after Git's option separator.
+ */
+@Remote({ authority: 'loopback' }) stage(workspaceId: WorkspaceId, path: string): Promise<void>
+
+/**
+ * Remove one path from the index.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @param path - Workspace-relative path passed after Git's option separator.
+ */
+@Remote({ authority: 'loopback' }) unstage(workspaceId: WorkspaceId, path: string): Promise<void>
+
+/**
+ * Discard one tracked file only after explicit confirmation.
+ * @param workspaceId - Registered workspace containing the repository.
+ * @param path - Workspace-relative tracked file path.
+ * @param confirmed - Explicit confirmation required before discarding changes.
+ */
+@Remote({ authority: 'loopback' }) discard(workspaceId: WorkspaceId, path: string, confirmed: boolean): Promise<void>
+```
+
+Source: [`packages/workspace/workspace-git/src/index.ts:28`](../../packages/workspace/workspace-git/src/index.ts)
+
 <a id="ctxworkspaceregistry--workspaceregistry"></a>
 
 ### `ctx.workspaceRegistry` — `WorkspaceRegistry`

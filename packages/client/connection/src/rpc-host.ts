@@ -2,6 +2,7 @@
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { WebRoute } from '@deepseek-ai/dsh-host-webserver'
+import type { WebUpgradeRoute } from '@deepseek-ai/dsh-host-webserver'
 import {
   clientRequestSchema,
   RpcId,
@@ -19,6 +20,7 @@ import type {
   ConnectionRpcHandler,
   ConnectionRpcHandlerOptions,
   HostConnectionHandle,
+  HostConnectionHttp,
   HostConnectionRpc,
 } from './rpc.ts'
 
@@ -62,6 +64,15 @@ export class HostConnectionService extends Service implements HostConnectionHand
     }
   }
 
+  /** Raw response and upgrade registry for binary browser transports. */
+  get http(): HostConnectionHttp {
+    const owner = this.ctx
+    return {
+      handle: (path, handler, options) => this.registerHttp(owner, path, handler as WebRoute['handler'], options.authority),
+      upgrade: (path, handler, options) => this.registerUpgrade(owner, path, handler as WebUpgradeRoute['handler'], options.authority),
+    }
+  }
+
   /**
    * Compose one shared-channel Fetch handler from its interceptor and fallback.
    * @param channel - shared channel mounted by Connection.
@@ -79,7 +90,7 @@ export class HostConnectionService extends Service implements HostConnectionHand
         if (endpoint === undefined || interceptor === undefined || !interceptor.matches(endpoint)) {
           return fallback.fetch(request)
         }
-        if (interceptor.options.authority === 'loopback' && !isTrustedApiRequest(request, [])) {
+        if (authorityFor(interceptor.options.authority, endpoint) === 'loopback' && !isTrustedApiRequest(request, [])) {
           return Promise.resolve(new Response('forbidden', { status: 403 }))
         }
         return interceptor.fetchHandler.fetch(request)
@@ -94,13 +105,12 @@ export class HostConnectionService extends Service implements HostConnectionHand
     options: ConnectionRpcHandlerOptions,
   ): () => Promise<void> {
     assertChannel(channel)
-    const trustedHosts = options.authority === 'loopback' ? [] : this.trustedHosts
     const fetchHandler = rpcFetchHandler(channel, handler)
     const route: WebRoute = {
       kind: 'prefix',
       path: channel,
       handler: async (req, res) => {
-        if (!isTrustedApiRequest(req, trustedHosts)) {
+        if (!isTrustedApiRequest(req, authorityFor(options.authority, endpointFromPath(channel, new URL(req.url ?? '/', 'http://x').pathname) ?? '') === 'loopback' ? [] : this.trustedHosts)) {
           res.writeHead(403)
           res.end('forbidden')
           return
@@ -139,6 +149,54 @@ export class HostConnectionService extends Service implements HostConnectionHand
       }
     }, `client-connection: ${channel} rpc interceptor`)
   }
+
+  private registerHttp(
+    owner: Context,
+    path: string,
+    handler: WebRoute['handler'],
+    authority: 'trusted-host' | 'loopback',
+  ): () => Promise<void> {
+    assertRawPath(path)
+    const trustedHosts = authority === 'loopback' ? [] : this.trustedHosts
+    return owner.effect(() => owner.webServer.register({
+      kind: 'exact', path,
+      handler: async (request, response) => {
+        if (!isTrustedApiRequest(request, trustedHosts)) {
+          response.writeHead(403)
+          response.end('forbidden')
+          return
+        }
+        await handler(request, response)
+      },
+    }), `client-connection: ${path} raw HTTP`)
+  }
+
+  private registerUpgrade(
+    owner: Context,
+    path: string,
+    handler: WebUpgradeRoute['handler'],
+    authority: 'trusted-host' | 'loopback',
+  ): () => Promise<void> {
+    assertRawPath(path)
+    const trustedHosts = authority === 'loopback' ? [] : this.trustedHosts
+    return owner.effect(() => owner.webServer.registerUpgrade({
+      path,
+      handler: (request, socket, head) => {
+        if (!isTrustedApiRequest(request, trustedHosts)) {
+          socket.destroy()
+          return
+        }
+        return handler(request, socket, head)
+      },
+    }), `client-connection: ${path} raw upgrade`)
+  }
+}
+
+function authorityFor(
+  authority: ConnectionRpcHandlerOptions['authority'],
+  endpoint: string,
+): 'trusted-host' | 'loopback' {
+  return typeof authority === 'function' ? authority(endpoint) : authority
 }
 
 function rpcFetchHandler(
@@ -220,5 +278,11 @@ function fullResponse(rpcId: RpcIdType, result: RpcServerResponse['result']): Re
 function assertChannel(channel: string): void {
   if (!CHANNEL_PATTERN.test(channel) || channel === '/api') {
     throw new Error(`connection: invalid or reserved RPC channel ${JSON.stringify(channel)}`)
+  }
+}
+
+function assertRawPath(path: string): void {
+  if (!/^\/[A-Za-z0-9._~\/-]+$/.test(path) || path.includes('//') || path.includes('/../') || path.endsWith('/..')) {
+    throw new Error(`connection: invalid raw path ${JSON.stringify(path)}`)
   }
 }

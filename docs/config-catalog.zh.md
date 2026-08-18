@@ -412,7 +412,7 @@ export interface ConnectionConfig {
 }
 ```
 
-来源：[`packages/client/connection/src/index.ts:50`](../packages/client/connection/src/index.ts)
+来源：[`packages/client/connection/src/index.ts:52`](../packages/client/connection/src/index.ts)
 
 <a id="deepseek-aidsh-client-hmr"></a>
 
@@ -1952,6 +1952,26 @@ export interface Config {
 
 来源：[`packages/spill/spill-policy/src/index.ts:60`](../packages/spill/spill-policy/src/index.ts)
 
+<a id="deepseek-aidsh-ssh"></a>
+
+## `@deepseek-ai/dsh-ssh`
+
+```ts config-catalog
+/** Configures SSH connection and output bounds. */
+export interface Config {
+  /** Maximum time in milliseconds to establish an SSH connection. */
+  connectTimeoutMs?: number
+  /** Maximum time in milliseconds for one dispatched command. */
+  execTimeoutMs?: number
+  /** Maximum captured bytes for each standard output stream. */
+  outputLimitBytes?: number
+  /** Reserved idle connection lifetime in milliseconds. */
+  idleTimeoutMs?: number
+}
+```
+
+来源：[`packages/ssh/ssh/src/index.ts:14`](../packages/ssh/ssh/src/index.ts)
+
 <a id="deepseek-aidsh-storage-domain"></a>
 
 ## `@deepseek-ai/dsh-storage-domain`
@@ -2258,6 +2278,20 @@ export interface Config {
 ```
 
 来源：[`packages/core/system-prompt/src/index.ts:186`](../packages/core/system-prompt/src/index.ts)
+
+<a id="deepseek-aidsh-task-board"></a>
+
+## `@deepseek-ai/dsh-task-board`
+
+```ts config-catalog
+/** Configures scheduler checks. */
+export interface Config {
+  /** Interval between scheduler checks in milliseconds. */
+  tickMs?: number
+}
+```
+
+来源：[`packages/schedule/task-board/src/index.ts:14`](../packages/schedule/task-board/src/index.ts)
 
 <a id="deepseek-aidsh-terminal-bash"></a>
 
@@ -2856,6 +2890,22 @@ export interface Config {
 
 来源：[`packages/typert/loader/src/index.ts:47`](../packages/typert/loader/src/index.ts)
 
+<a id="deepseek-aidsh-usage-stats"></a>
+
+## `@deepseek-ai/dsh-usage-stats`
+
+需要：`sessionPersistence` · `sessions`
+
+```ts config-catalog
+/** Configures bounded cold-session inspection. */
+export interface Config {
+  /** Maximum persistence inspections in flight. */
+  inspectConcurrency?: number
+}
+```
+
+来源：[`packages/session/usage-stats/src/index.ts:17`](../packages/session/usage-stats/src/index.ts)
+
 <a id="deepseek-aidsh-user-approval"></a>
 
 ## `@deepseek-ai/dsh-user-approval`
@@ -3065,6 +3115,44 @@ export interface Config {
 
 来源：[`packages/workflow/workflow-worker-thread/src/index.ts:32`](../packages/workflow/workflow-worker-thread/src/index.ts)
 
+<a id="deepseek-aidsh-workspace-files"></a>
+
+## `@deepseek-ai/dsh-workspace-files`
+
+需要：`workspaceRegistry`
+
+```ts config-catalog
+/** Configures bounded filesystem reads and searches. */
+export interface Config {
+  /** Maximum bytes read for one text preview. */
+  previewBytes?: number
+  /** Maximum matching entries returned by one search. */
+  searchResultLimit?: number
+  /** Maximum filesystem entries examined by one search. */
+  searchScanLimit?: number
+}
+```
+
+来源：[`packages/workspace/workspace-files/src/index.ts:21`](../packages/workspace/workspace-files/src/index.ts)
+
+<a id="deepseek-aidsh-workspace-git"></a>
+
+## `@deepseek-ai/dsh-workspace-git`
+
+需要：`workspaceRegistry`
+
+```ts config-catalog
+/** Limits Git process duration and graph size. */
+export interface Config {
+  /** Maximum duration in milliseconds for one Git subprocess. */
+  timeoutMs?: number
+  /** Maximum commits returned by one graph request. */
+  graphLimit?: number
+}
+```
+
+来源：[`packages/workspace/workspace-git/src/index.ts:14`](../packages/workspace/workspace-git/src/index.ts)
+
 ## 无配置的可加载插件
 
 这些插件通过 `cordis.yml` 中不含 `config:` 块的条目加载；它们未声明任何配置接口。
@@ -3083,6 +3171,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-deliverables` — 需要 `systemPrompt`（[`packages/client/ui-deliverables/src/index.ts`](../packages/client/ui-deliverables/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-directory-picker-browse`（[`packages/client/ui-directory-picker-browse/src/index.ts`](../packages/client/ui-directory-picker-browse/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-directory-picker-native`（[`packages/client/ui-directory-picker-native/src/index.ts`](../packages/client/ui-directory-picker-native/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-git-graph`（[`packages/client/ui-git-graph/src/index.ts`](../packages/client/ui-git-graph/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-goal`（[`packages/client/ui-goal/src/index.ts`](../packages/client/ui-goal/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-input-trigger`（[`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-jobs`（[`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts)）
@@ -3098,13 +3187,17 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-settings-plugins`（[`packages/client/ui-settings-plugins/src/index.ts`](../packages/client/ui-settings-plugins/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-sidebar`（[`packages/client/ui-sidebar/src/index.ts`](../packages/client/ui-sidebar/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-skill`（[`packages/client/ui-skill/src/index.ts`](../packages/client/ui-skill/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-ssh`（[`packages/client/ui-ssh/src/index.ts`](../packages/client/ui-ssh/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-subagent`（[`packages/client/ui-subagent/src/index.ts`](../packages/client/ui-subagent/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-task-board`（[`packages/client/ui-task-board/src/index.ts`](../packages/client/ui-task-board/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-theme`（[`packages/client/ui-theme/src/index.ts`](../packages/client/ui-theme/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-tool`（[`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-trajectory`（[`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-usage-stats`（[`packages/client/ui-usage-stats/src/index.ts`](../packages/client/ui-usage-stats/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-user-questions`（[`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-workflow-run`（[`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-workspace`（[`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-workspace-inspector`（[`packages/client/ui-workspace-inspector/src/index.ts`](../packages/client/ui-workspace-inspector/src/index.ts)）
 - `@deepseek-ai/dsh-command-codegraph-init` — 需要 `commands` · `codegraphIndex`（[`packages/codegraph/command-codegraph-init/src/index.ts`](../packages/codegraph/command-codegraph-init/src/index.ts)）
 - `@deepseek-ai/dsh-command-compact` — 需要 `commands` · `compact`（[`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts)）
 - `@deepseek-ai/dsh-command-feedback` — 需要 `commands`（[`packages/feedback/command-feedback/src/index.ts`](../packages/feedback/command-feedback/src/index.ts)）
@@ -3133,6 +3226,7 @@ export interface Config {
 - `@deepseek-ai/dsh-tool-ask-user` — 需要 `tools` · `userInteraction`（[`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)）
 - `@deepseek-ai/dsh-tool-call-timeout-policy` — 需要 `tools`（[`packages/guard/timeout-policy/src/index.ts`](../packages/guard/timeout-policy/src/index.ts)）
 - `@deepseek-ai/dsh-tool-cordis` — 需要 `tools` · `systemPrompt` · `dynamicCordisRunner` · `cordisInspect`（[`packages/extensions/tool-cordis/src/index.ts`](../packages/extensions/tool-cordis/src/index.ts)）
+- `@deepseek-ai/dsh-tool-ssh` — 需要 `tools`（[`packages/ssh/tool-ssh/src/index.ts`](../packages/ssh/tool-ssh/src/index.ts)）
 - `@deepseek-ai/dsh-tool-subagent-control` — 需要 `tools` · `subagents`（[`packages/subagent/tool-subagent-control/src/index.ts`](../packages/subagent/tool-subagent-control/src/index.ts)）
 - `@deepseek-ai/dsh-user-questions`（[`packages/interaction/user-questions/src/index.ts`](../packages/interaction/user-questions/src/index.ts)）
 - `@deepseek-ai/dsh-workspace` — 需要 `storageDomain` · `sessionPersistence`（[`packages/workspace/workspace/src/index.ts`](../packages/workspace/workspace/src/index.ts)）

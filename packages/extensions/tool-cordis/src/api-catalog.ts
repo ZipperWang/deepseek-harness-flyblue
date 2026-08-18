@@ -1554,6 +1554,36 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'ssh',
+    summary: 'Host SSH service.',
+    description: 'Host SSH service. A connection loss after channel dispatch reports an unknown result and is never replayed.',
+    methods: [
+      {
+        signature: '@Remote({ authority: \'loopback\' }) list(): SshHostSummary[]',
+        description: 'List configured hosts without passwords, passphrases, or key paths.',
+        parameters: [],
+        returns: 'Secret-free copies of the configured host records.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async put(host: SshHost): Promise<SshHostSummary>',
+        description: 'Save a host record. The complete secret-bearing configuration remains local.',
+        parameters: [{ name: 'host', description: 'Complete local host configuration to insert or replace.' }],
+        returns: 'The saved host with secret fields removed.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async remove(id: SshHostId): Promise<void>',
+        description: 'Remove a host record.',
+        parameters: [{ name: 'id', description: 'Stable identifier of the host to remove.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async exec(id: SshHostId, command: string): Promise<{ stdout: string; stderr: string; exitCode: number | null; result: \'known\' | \'result-unknown\' }>',
+        description: 'Execute one command once. A dropped dispatched channel returns `result-unknown`.',
+        parameters: [{ name: 'id', description: 'Stable identifier of the configured host.' }, { name: 'command', description: 'Command text passed to the remote SSH server.' }],
+        returns: 'Captured streams, exit status, and whether the dispatched result is known.',
+      },
+    ],
+  },
+  {
     key: 'storage',
     summary: 'The storage hub service.',
     description: 'The storage hub service. Backends register under `backend`; data forms mount under their `StorageForms` key and are reached as `ctx.storage.<form>`.',
@@ -1752,6 +1782,43 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Assemble global and scoped providers, detach tool parameters, apply canonical ordering, then run the assembly waterfall. Scoped sections and variables shadow globals. The returned waterfall value is authoritative except that an effective complete section is restored afterwards as the sole prompt section.',
         parameters: [{ name: 'context', description: 'the optional scope and plugin-defined assembly fields.' }],
         returns: 'the post-waterfall assembly with any complete prompt enforced.',
+      },
+    ],
+  },
+  {
+    key: 'taskBoard',
+    summary: 'Task service with request-id idempotence and locked ledger publication.',
+    description: 'Task service with request-id idempotence and locked ledger publication.',
+    methods: [
+      {
+        signature: '@Remote async list(): Promise<TaskView[]>',
+        description: 'Read task-board state.',
+        parameters: [],
+        returns: 'Copies of every durable task in ledger order.',
+      },
+      {
+        signature: '@Remote async create(title: string, requestId: string): Promise<TaskView>',
+        description: 'Create a task; repeating the same request id returns the original result.',
+        parameters: [{ name: 'title', description: 'User-visible task title; surrounding whitespace is removed.' }, { name: 'requestId', description: 'Browser-generated idempotency key for this mutation.' }],
+        returns: 'The created task or the result previously stored for the request id.',
+      },
+      {
+        signature: '@Remote async archive(id: TaskId, requestId: string): Promise<TaskView>',
+        description: 'Archive a task with an idempotent request id.',
+        parameters: [{ name: 'id', description: 'Durable task to archive.' }, { name: 'requestId', description: 'Browser-generated idempotency key for this mutation.' }],
+        returns: 'The archived task or the result previously stored for the request id.',
+      },
+      {
+        signature: '@Remote async update(id: TaskId, title: string, requestId: string): Promise<TaskView>',
+        description: 'Change an active task title through an idempotent browser action.',
+        parameters: [{ name: 'id', description: 'Durable task to update.' }, { name: 'title', description: 'Replacement title; surrounding whitespace is removed.' }, { name: 'requestId', description: 'Browser-generated idempotency key for this mutation.' }],
+        returns: 'The updated task or the result previously stored for the request id.',
+      },
+      {
+        signature: '@Remote async remove(id: TaskId, requestId: string): Promise<TaskView>',
+        description: 'Permanently remove an archived task through an idempotent action.',
+        parameters: [{ name: 'id', description: 'Archived task to remove.' }, { name: 'requestId', description: 'Browser-generated idempotency key for this mutation.' }],
+        returns: 'The removed task or the result previously stored for the request id.',
       },
     ],
   },
@@ -2023,6 +2090,19 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'usageStats',
+    summary: 'Derives browser-safe historical accounting from every local session log.',
+    description: 'Derives browser-safe historical accounting from every local session log. The service reads no credentials, plans, balances, prices, or quotas.',
+    methods: [
+      {
+        signature: '@Remote async stats(request: UsageStatsRequest): Promise<UsageStatsSnapshot>',
+        description: 'Read one consistent per-session scan for the requested Host calendar range.',
+        parameters: [{ name: 'request', description: 'Seven- or thirty-day inclusive range.' }],
+        returns: 'Dense daily activity and provider-reported usage.',
+      },
+    ],
+  },
+  {
     key: 'userQuestions',
     summary: '`ctx.userQuestions`: one active UI provider plus an `ask()` API.',
     description: '`ctx.userQuestions`: one active UI provider plus an `ask()` API.',
@@ -2120,6 +2200,102 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Parse and execute a workflow script.',
         parameters: [{ name: 'request', description: 'the script, its `args`, the parent agent, and an optional cancel signal.' }],
         returns: 'the live run; its `result` resolves when the script settles.',
+      },
+    ],
+  },
+  {
+    key: 'workspaceFiles',
+    summary: 'Host service for ID-scoped file tree, preview, search, and mutations.',
+    description: 'Host service for ID-scoped file tree, preview, search, and mutations.',
+    methods: [
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async tree(workspaceId: WorkspaceId, path: string): Promise<WorkspaceFileEntry[]>',
+        description: 'List immediate children of one workspace-relative directory.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the read.' }, { name: 'path', description: 'Workspace-relative directory, or an empty string for the root.' }],
+        returns: 'Direct children with stable metadata ordering.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async preview(workspaceId: WorkspaceId, path: string): Promise<WorkspaceFilePreview>',
+        description: 'Read a bounded UTF-8 preview. Binary data is served only through a raw loopback route.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the read.' }, { name: 'path', description: 'Workspace-relative file path.' }],
+        returns: 'Text preview and the version token required for a subsequent save.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async save(workspaceId: WorkspaceId, path: string, content: string, version: FileVersion): Promise<WorkspaceFilePreview>',
+        description: 'Save text only when the browser\'s version token still matches disk.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the write.' }, { name: 'path', description: 'Workspace-relative file path.' }, { name: 'content', description: 'Complete UTF-8 replacement text.' }, { name: 'version', description: 'Version returned by the latest preview.' }],
+        returns: 'The saved file\'s current preview and replacement version token.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async search(workspaceId: WorkspaceId, query: string): Promise<WorkspaceFileEntry[]>',
+        description: 'Search names without following links or walking Git internals.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the search.' }, { name: 'query', description: 'Case-insensitive filename fragment.' }],
+        returns: 'Matching entries up to the configured result and scan limits.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async rename(workspaceId: WorkspaceId, path: string, name: string, confirmed: boolean): Promise<void>',
+        description: 'Rename a relative path after an explicit destructive confirmation.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the mutation.' }, { name: 'path', description: 'Existing workspace-relative source path.' }, { name: 'name', description: 'Replacement basename without path separators.' }, { name: 'confirmed', description: 'Explicit confirmation required before the rename.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async create(workspaceId: WorkspaceId, path: string): Promise<void>',
+        description: 'Create an empty file, refusing to overwrite an existing path.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the mutation.' }, { name: 'path', description: 'New workspace-relative file path.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async remove(workspaceId: WorkspaceId, path: string, confirmed: boolean): Promise<void>',
+        description: 'Delete a path only after an explicit confirmation.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace whose root authorizes the mutation.' }, { name: 'path', description: 'Existing workspace-relative path to remove.' }, { name: 'confirmed', description: 'Explicit confirmation required before deletion.' }],
+      },
+    ],
+  },
+  {
+    key: 'workspaceGit',
+    summary: 'Host service for the shared Git state used by graph and file-change panels.',
+    description: 'Host service for the shared Git state used by graph and file-change panels.',
+    methods: [
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async status(workspaceId: WorkspaceId): Promise<GitStatusEntry[]>',
+        description: 'Read working-tree status.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }],
+        returns: 'Porcelain status entries for index and working-tree changes.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async branches(workspaceId: WorkspaceId): Promise<{ current: string | null; branches: string[] }>',
+        description: 'List local branches and the current branch.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }],
+        returns: 'Local branch names and the current branch when attached.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async graph(workspaceId: WorkspaceId): Promise<GitGraphEntry[]>',
+        description: 'Read a bounded commit graph without exposing arbitrary process execution.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }],
+        returns: 'Commit rows up to the configured graph limit.',
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) createBranch(workspaceId: WorkspaceId, name: string): Promise<void>',
+        description: 'Create a branch at the current HEAD.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }, { name: 'name', description: 'New local branch name interpreted by Git.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) async switchBranch(workspaceId: WorkspaceId, name: string): Promise<void>',
+        description: 'Switch only when no merge/rebase/cherry-pick is active and the tree is clean.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }, { name: 'name', description: 'Existing local branch name.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) stage(workspaceId: WorkspaceId, path: string): Promise<void>',
+        description: 'Stage one workspace-relative path.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }, { name: 'path', description: 'Workspace-relative path passed after Git\'s option separator.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) unstage(workspaceId: WorkspaceId, path: string): Promise<void>',
+        description: 'Remove one path from the index.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }, { name: 'path', description: 'Workspace-relative path passed after Git\'s option separator.' }],
+      },
+      {
+        signature: '@Remote({ authority: \'loopback\' }) discard(workspaceId: WorkspaceId, path: string, confirmed: boolean): Promise<void>',
+        description: 'Discard one tracked file only after explicit confirmation.',
+        parameters: [{ name: 'workspaceId', description: 'Registered workspace containing the repository.' }, { name: 'path', description: 'Workspace-relative tracked file path.' }, { name: 'confirmed', description: 'Explicit confirmation required before discarding changes.' }],
       },
     ],
   },
@@ -3061,6 +3237,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface FileLocation {\n    path: string;\n    line?: number;\n}',
   },
   {
+    name: 'FileVersion',
+    declaration: 'export type FileVersion = Branded<\'FileVersion\'>;',
+  },
+  {
     name: 'FinishReason',
     declaration: 'export type FinishReason = FinishReasonMap[keyof FinishReasonMap];',
   },
@@ -3123,6 +3303,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'GenericResultView',
     declaration: 'export interface GenericResultView {\n    card: \'generic\';\n    title?: string;\n    content?: ContentBlock[];\n}',
+  },
+  {
+    name: 'GitGraphEntry',
+    declaration: 'export interface GitGraphEntry {\n    hash: string;\n    parents: string[];\n    subject: string;\n    refs: string[];\n}',
+  },
+  {
+    name: 'GitStatusEntry',
+    declaration: 'export interface GitStatusEntry {\n    path: string;\n    index: string;\n    worktree: string;\n}',
   },
   {
     name: 'GoalActivation',
@@ -4101,6 +4289,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface SpillSource {\n    toolName: string;\n    callId: CallId;\n    label: string;\n}',
   },
   {
+    name: 'SshHost',
+    declaration: 'export interface SshHost {\n    id: SshHostId;\n    alias: string;\n    host: string;\n    port: number;\n    user: string;\n    password?: string;\n    privateKeyPath?: string;\n}',
+  },
+  {
+    name: 'SshHostId',
+    declaration: 'export type SshHostId = Branded<\'SshHostId\'>;',
+  },
+  {
+    name: 'SshHostSummary',
+    declaration: 'export type SshHostSummary = Omit<SshHost, \'password\' | \'privateKeyPath\'> & {\n    auth: \'password\' | \'key\';\n};',
+  },
+  {
     name: 'StorageBackend',
     declaration: 'export interface StorageBackend {\n    readonly kv?: KvFacet;\n    close(): Promise<void>;\n}',
   },
@@ -4263,6 +4463,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'TableValueOf',
     declaration: 'export type TableValueOf<S extends DomainSpec, N extends keyof S[\'tables\']> = S[\'tables\'][N] extends DomainTableSpec<string, infer V> ? V : never;',
+  },
+  {
+    name: 'TaskId',
+    declaration: 'export type TaskId = Branded<\'TaskId\'>;',
+  },
+  {
+    name: 'TaskView',
+    declaration: 'export interface TaskView {\n    id: TaskId;\n    title: string;\n    archived: boolean;\n    createdAt: number;\n    updatedAt: number;\n}',
   },
   {
     name: 'TerminalBackend',
@@ -4545,6 +4753,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface TypertTypeModel {\n    readonly name: string;\n    readonly declaration: string;\n}',
   },
   {
+    name: 'UsageStatsDay',
+    declaration: 'export interface UsageStatsDay extends UsageTokenBuckets {\n    date: string;\n    totalTokens: number;\n    sessionCount: number;\n    messageCount: number;\n}',
+  },
+  {
+    name: 'UsageStatsDays',
+    declaration: 'export type UsageStatsDays = 7 | 30;',
+  },
+  {
+    name: 'UsageStatsModel',
+    declaration: 'export interface UsageStatsModel extends UsageTokenBuckets {\n    provider: string;\n    model: string;\n    totalTokens: number;\n    sessionCount: number;\n}',
+  },
+  {
+    name: 'UsageStatsRequest',
+    declaration: 'export interface UsageStatsRequest {\n    days: UsageStatsDays;\n}',
+  },
+  {
+    name: 'UsageStatsSnapshot',
+    declaration: 'export interface UsageStatsSnapshot extends UsageTokenBuckets {\n    days: UsageStatsDays;\n    timeZone: string;\n    startDate: string;\n    endDate: string;\n    generatedAt: number;\n    totalTokens: number;\n    sessionCount: number;\n    messageCount: number;\n    activeDays: number;\n    currentStreakDays: number;\n    daily: UsageStatsDay[];\n    models: UsageStatsModel[];\n}',
+  },
+  {
+    name: 'UsageTokenBuckets',
+    declaration: 'export interface UsageTokenBuckets {\n    uncachedInputTokens: number;\n    outputTokens: number;\n    cacheReadTokens: number;\n    cacheWriteTokens: number;\n    reasoningTokens: number;\n}',
+  },
+  {
     name: 'UserMessage',
     declaration: 'export interface UserMessage extends Message {\n    readonly role: \'user\';\n}',
   },
@@ -4667,6 +4899,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'WorkflowStopReason',
     declaration: 'export type WorkflowStopReason = \'completed\' | \'cancelled\' | \'error\';',
+  },
+  {
+    name: 'WorkspaceFileEntry',
+    declaration: 'export interface WorkspaceFileEntry {\n    path: string;\n    name: string;\n    directory: boolean;\n    size: number;\n    version: FileVersion;\n}',
+  },
+  {
+    name: 'WorkspaceFilePreview',
+    declaration: 'export interface WorkspaceFilePreview {\n    path: string;\n    content: string;\n    truncated: boolean;\n    version: FileVersion;\n}',
   },
 ]
 

@@ -1,0 +1,1 @@
+{"extends":"../../../tsconfig.base.json","compilerOptions":{"rootDir":"src","outDir":"lib/types"},"include":["src"],"references":[{"path":"../../../vendor/cordis"},{"path":"../../util/atomic-write"},{"path":"../../util/brand"},{"path":"../../util/home-paths"},{"path":"../../runtime-diagnostics/invariants"},{"path":"../../typert/protocol"}]}

@@ -1,0 +1,118 @@
+- heading "用量统计" [level=2]
+- paragraph: 基于此设备上的全部会话日志统计，不包含费用、余额或套餐信息。
+- button "刷新"
+- button "最近 7 天"
+- button "最近 30 天" [pressed]
+- article:
+  - text: Token 总量
+  - strong: "224"
+- article:
+  - text: 会话数
+  - strong: "2"
+- article:
+  - text: 消息数
+  - strong: "6"
+- article:
+  - text: 活跃天数
+  - strong: 3 / 30
+- article:
+  - text: 当前连续活跃
+  - strong: 1 天
+- article:
+  - text: 最常用模型
+  - strong: deepseek-chat
+  - text: 50.4% · deepseek
+- article:
+  - heading "消息活跃度" [level=3]
+  - paragraph: 每格代表一个 Host 日历日，颜色越深表示可见消息越多。
+  - list "消息活跃度":
+    - 'listitem "2026年7月20日: 0 条消息"'
+    - 'listitem "2026年7月21日: 0 条消息"'
+    - 'listitem "2026年7月22日: 0 条消息"'
+    - 'listitem "2026年7月23日: 0 条消息"'
+    - 'listitem "2026年7月24日: 0 条消息"'
+    - 'listitem "2026年7月25日: 0 条消息"'
+    - 'listitem "2026年7月26日: 0 条消息"'
+    - 'listitem "2026年7月27日: 0 条消息"'
+    - 'listitem "2026年7月28日: 0 条消息"'
+    - 'listitem "2026年7月29日: 0 条消息"'
+    - 'listitem "2026年7月30日: 2 条消息"'
+    - 'listitem "2026年7月31日: 0 条消息"'
+    - 'listitem "2026年8月1日: 0 条消息"'
+    - 'listitem "2026年8月2日: 0 条消息"'
+    - 'listitem "2026年8月3日: 0 条消息"'
+    - 'listitem "2026年8月4日: 0 条消息"'
+    - 'listitem "2026年8月5日: 0 条消息"'
+    - 'listitem "2026年8月6日: 0 条消息"'
+    - 'listitem "2026年8月7日: 0 条消息"'
+    - 'listitem "2026年8月8日: 0 条消息"'
+    - 'listitem "2026年8月9日: 0 条消息"'
+    - 'listitem "2026年8月10日: 0 条消息"'
+    - 'listitem "2026年8月11日: 0 条消息"'
+    - 'listitem "2026年8月12日: 0 条消息"'
+    - 'listitem "2026年8月13日: 0 条消息"'
+    - 'listitem "2026年8月14日: 0 条消息"'
+    - 'listitem "2026年8月15日: 0 条消息"'
+    - 'listitem "2026年8月16日: 2 条消息"'
+    - 'listitem "2026年8月17日: 0 条消息"'
+    - 'listitem "2026年8月18日: 2 条消息"'
+- article:
+  - heading "每日 Token 趋势" [level=3]
+  - paragraph: 所选范围共有 224 Token 和 6 条可见消息。
+  - list "每日 Token 趋势":
+    - 'listitem "2026年7月20日: 0 Token"': 7月20日
+    - 'listitem "2026年7月21日: 0 Token"': 7月21日
+    - 'listitem "2026年7月22日: 0 Token"': 7月22日
+    - 'listitem "2026年7月23日: 0 Token"': 7月23日
+    - 'listitem "2026年7月24日: 0 Token"': 7月24日
+    - 'listitem "2026年7月25日: 0 Token"': 7月25日
+    - 'listitem "2026年7月26日: 0 Token"': 7月26日
+    - 'listitem "2026年7月27日: 0 Token"': 7月27日
+    - 'listitem "2026年7月28日: 0 Token"': 7月28日
+    - 'listitem "2026年7月29日: 0 Token"': 7月29日
+    - 'listitem "2026年7月30日: 113 Token"': 7月30日
+    - 'listitem "2026年7月31日: 0 Token"': 7月31日
+    - 'listitem "2026年8月1日: 0 Token"': 8月1日
+    - 'listitem "2026年8月2日: 0 Token"': 8月2日
+    - 'listitem "2026年8月3日: 0 Token"': 8月3日
+    - 'listitem "2026年8月4日: 0 Token"': 8月4日
+    - 'listitem "2026年8月5日: 0 Token"': 8月5日
+    - 'listitem "2026年8月6日: 0 Token"': 8月6日
+    - 'listitem "2026年8月7日: 0 Token"': 8月7日
+    - 'listitem "2026年8月8日: 0 Token"': 8月8日
+    - 'listitem "2026年8月9日: 0 Token"': 8月9日
+    - 'listitem "2026年8月10日: 0 Token"': 8月10日
+    - 'listitem "2026年8月11日: 0 Token"': 8月11日
+    - 'listitem "2026年8月12日: 0 Token"': 8月12日
+    - 'listitem "2026年8月13日: 0 Token"': 8月13日
+    - 'listitem "2026年8月14日: 0 Token"': 8月14日
+    - 'listitem "2026年8月15日: 0 Token"': 8月15日
+    - 'listitem "2026年8月16日: 68 Token"': 8月16日
+    - 'listitem "2026年8月17日: 0 Token"': 8月17日
+    - 'listitem "2026年8月18日: 43 Token"': 8月18日
+- article:
+  - heading "模型用量" [level=3]
+  - img "按 Token 展示 3 个模型。"
+  - list:
+    - listitem:
+      - text: deepseek-chat deepseek
+      - strong: "113"
+    - listitem:
+      - text: deepseek-reasoner deepseek
+      - strong: "68"
+    - listitem:
+      - text: local-model openai-compatible
+      - strong: "43"
+- article:
+  - heading "Token 构成" [level=3]
+  - text: 未缓存输入
+  - strong: "170"
+  - text: 输出
+  - strong: "45"
+  - text: 缓存读取
+  - strong: "9"
+  - text: 缓存写入
+  - strong: "0"
+  - paragraph: 其中推理 Token 为 6，已包含在输出中，不重复计入总量。
+- group: 查看完整明细
+- paragraph: 生成于 {{clock}} · Asia/Shanghai

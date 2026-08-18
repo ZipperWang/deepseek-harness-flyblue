@@ -193,6 +193,22 @@ flowchart LR
   svc_codegraphIndex["ctx.codegraphIndex<br/>Web host CodeGraph index lifecycle"]
   pkg_client_ui_codegraph["client-ui-codegraph"]
   pkg_command_codegraph_init["command-codegraph-init"]
+  pkg_task_board["task-board"]
+  svc_taskBoard["ctx.taskBoard<br/>Durable task-board ledger"]
+  pkg_client_ui_task_board["client-ui-task-board"]
+  pkg_ssh["ssh"]
+  svc_ssh["ctx.ssh<br/>SSH host operations"]
+  pkg_tool_ssh["tool-ssh"]
+  pkg_client_ui_ssh["client-ui-ssh"]
+  pkg_usage_stats["usage-stats"]
+  svc_usageStats["ctx.usageStats<br/>Local usage history projection"]
+  pkg_client_ui_usage_stats["client-ui-usage-stats"]
+  pkg_workspace_files["workspace-files"]
+  svc_workspaceFiles["ctx.workspaceFiles<br/>Workspace file operations"]
+  pkg_client_ui_workspace_inspector["client-ui-workspace-inspector"]
+  pkg_workspace_git["workspace-git"]
+  svc_workspaceGit["ctx.workspaceGit<br/>Workspace Git operations"]
+  pkg_client_ui_git_graph["client-ui-git-graph"]
   svc_apiProxy["ctx.apiProxy<br/>Host API dispatch"]
   pkg_cordis_host_runner["cordis-host-runner"]
   svc_dynamicCordisRunner["ctx.dynamicCordisRunner<br/>Dynamic Cordis package host runner"]
@@ -269,6 +285,7 @@ flowchart LR
   pkg_skill_filesystem --> svc_skills
   pkg_spill --> svc_spillStore
   pkg_spill_local --> svc_spillStore
+  pkg_ssh --> svc_ssh
   pkg_storage --> svc_storage
   pkg_storage_domain --> svc_storageDomain
   pkg_storage_json --> svc_storage
@@ -284,11 +301,13 @@ flowchart LR
   pkg_subprocess_e2b --> svc_subprocess
   pkg_subprocess_local --> svc_subprocess
   pkg_system_prompt --> svc_systemPrompt
+  pkg_task_board --> svc_taskBoard
   pkg_terminal --> svc_terminals
   pkg_terminal_bash --> svc_terminals
   pkg_token_meter --> svc_tokenMeter
   pkg_tools --> svc_tools
   pkg_typert_registry --> svc_typert
+  pkg_usage_stats --> svc_usageStats
   pkg_user_questions --> svc_userQuestions
   pkg_web --> svc_web
   pkg_web_fetch_http --> svc_web
@@ -299,6 +318,8 @@ flowchart LR
   pkg_workflow --> svc_workflowEngine
   pkg_workflow_worker_thread --> svc_workflowEngine
   pkg_workspace --> svc_workspaceRegistry
+  pkg_workspace_files --> svc_workspaceFiles
+  pkg_workspace_git --> svc_workspaceGit
   svc_agentDefaultModel --> pkg_headless
   svc_agentDefaultModel --> pkg_host_apiproxy
   svc_agentLoop --> pkg_agent_spine_demo
@@ -372,6 +393,8 @@ flowchart LR
   svc_shellEnv --> pkg_tool_pwsh
   svc_skills --> pkg_tool_skill
   svc_spillStore --> pkg_spill_policy
+  svc_ssh --> pkg_client_ui_ssh
+  svc_ssh --> pkg_tool_ssh
   svc_storage --> pkg_storage_domain
   svc_storageDomain --> pkg_message_feedback
   svc_storageDomain --> pkg_workspace
@@ -390,6 +413,7 @@ flowchart LR
   svc_systemPrompt --> pkg_tool_terminal
   svc_systemPrompt --> pkg_tool_web
   svc_systemPrompt --> pkg_tools
+  svc_taskBoard --> pkg_client_ui_task_board
   svc_terminals --> pkg_tool_terminal
   svc_tokenMeter --> pkg_compaction_basic
   svc_toolResultPruner --> pkg_compaction_basic
@@ -405,6 +429,7 @@ flowchart LR
   svc_tools --> pkg_tool_web
   svc_typert --> pkg_api_gateway
   svc_typert --> pkg_typert_loader
+  svc_usageStats --> pkg_client_ui_usage_stats
   svc_userQuestions --> pkg_tool_ask_user
   svc_web --> pkg_tool_web
   svc_webServer --> pkg_connection
@@ -412,6 +437,8 @@ flowchart LR
   svc_webServer --> pkg_modules
   svc_workflowEngine --> pkg_tool_ralph
   svc_workflowEngine --> pkg_tool_workflow
+  svc_workspaceFiles --> pkg_client_ui_workspace_inspector
+  svc_workspaceGit --> pkg_client_ui_git_graph
   svc_workspaceRegistry --> pkg_apiproxy
   svc_fs -. event gate .-> pkg_fs_observation_policy
 ```
@@ -472,6 +499,11 @@ flowchart LR
 | `ctx.workflowEngine` | `seam` | [`workflow`](../packages/workflow/workflow) | [`workflow-worker-thread`](../packages/workflow/workflow-worker-thread) | [`tool-workflow`](../packages/workflow/tool-workflow), [`tool-ralph`](../packages/workflow/tool-ralph) | - | One engine per context, as in bash, with no named-provider registry; the general workflow and fixed Ralph consumers start runs whose agent() calls fan out through ctx.subagents. |
 | `ctx.lsp` | `seam` | [`lsp`](../packages/lsp/lsp) | `lsp-local` | [`tool-lsp`](../packages/lsp/tool-lsp) | - | Provider registration and selection plus normalized query execution over exactly four operations; the seam offers no protocol escape hatch, so a backend translates into the normalized request and result. |
 | `ctx.codegraphIndex` | `core` | [`codegraph-index`](../packages/codegraph/codegraph-index) | - | [`client-ui-codegraph`](../packages/client/ui-codegraph), [`command-codegraph-init`](../packages/codegraph/command-codegraph-init) | - | status and init read session.header.cwd and start codegraph init; /codegraph-init is the human command consumer; the model-facing tool plugin never does. |
+| `ctx.taskBoard` | `core` | [`task-board`](../packages/schedule/task-board) | - | [`client-ui-task-board`](../packages/client/ui-task-board) | - | Owns task persistence and request-id idempotence; the browser settings section consumes its Remote methods. |
+| `ctx.ssh` | `core` | [`ssh`](../packages/ssh/ssh) | - | [`tool-ssh`](../packages/ssh/tool-ssh), [`client-ui-ssh`](../packages/client/ui-ssh) | - | Owns secret-bearing host records and at-most-once command dispatch; model and browser consumers receive secret-free projections. |
+| `ctx.usageStats` | `core` | [`usage-stats`](../packages/session/usage-stats) | - | [`client-ui-usage-stats`](../packages/client/ui-usage-stats) | - | Derives cached daily and model aggregates from the union of live and persisted local sessions. |
+| `ctx.workspaceFiles` | `core` | [`workspace-files`](../packages/workspace/workspace-files) | - | [`client-ui-workspace-inspector`](../packages/client/ui-workspace-inspector) | - | Resolves every read and mutation through a registered workspace id and rejects traversal, Git internals, and escaping links. |
+| `ctx.workspaceGit` | `core` | [`workspace-git`](../packages/workspace/workspace-git) | - | [`client-ui-git-graph`](../packages/client/ui-git-graph) | - | Owns bounded Git subprocesses and guarded branch, index, and worktree mutations for registered workspaces. |
 | `ctx.apiProxy` | `core` | `apiproxy` | - | `connection` | - | The transport-agnostic host gateway face: it dispatches browser API calls, and each open host stream subscribes to the events it forwards rather than being pushed to through a broadcast verb. |
 | `ctx.dynamicCordisRunner` | `core` | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) | - | [`tool-cordis`](../packages/extensions/tool-cordis) | - | Owns the in-memory definition registry, the vm sandbox for host halves, and the request-run round trip; browser pages reach the same service over the wire through its remote namespace. |
 | `ctx.cordisInspect` | `core` | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) | - | [`tool-cordis`](../packages/extensions/tool-cordis) | - | Registers host inspect providers, mirrors the client provider manifest, and routes client queries through the dynamic Cordis transport. |

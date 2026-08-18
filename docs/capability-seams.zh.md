@@ -195,6 +195,22 @@ flowchart LR
   svc_codegraphIndex["ctx.codegraphIndex<br/>Web host CodeGraph index lifecycle"]
   pkg_client_ui_codegraph["client-ui-codegraph"]
   pkg_command_codegraph_init["command-codegraph-init"]
+  pkg_task_board["task-board"]
+  svc_taskBoard["ctx.taskBoard<br/>Durable task-board ledger"]
+  pkg_client_ui_task_board["client-ui-task-board"]
+  pkg_ssh["ssh"]
+  svc_ssh["ctx.ssh<br/>SSH host operations"]
+  pkg_tool_ssh["tool-ssh"]
+  pkg_client_ui_ssh["client-ui-ssh"]
+  pkg_usage_stats["usage-stats"]
+  svc_usageStats["ctx.usageStats<br/>Local usage history projection"]
+  pkg_client_ui_usage_stats["client-ui-usage-stats"]
+  pkg_workspace_files["workspace-files"]
+  svc_workspaceFiles["ctx.workspaceFiles<br/>Workspace file operations"]
+  pkg_client_ui_workspace_inspector["client-ui-workspace-inspector"]
+  pkg_workspace_git["workspace-git"]
+  svc_workspaceGit["ctx.workspaceGit<br/>Workspace Git operations"]
+  pkg_client_ui_git_graph["client-ui-git-graph"]
   svc_apiProxy["ctx.apiProxy<br/>Host API dispatch"]
   pkg_cordis_host_runner["cordis-host-runner"]
   svc_dynamicCordisRunner["ctx.dynamicCordisRunner<br/>Dynamic Cordis package host runner"]
@@ -271,6 +287,7 @@ flowchart LR
   pkg_skill_filesystem --> svc_skills
   pkg_spill --> svc_spillStore
   pkg_spill_local --> svc_spillStore
+  pkg_ssh --> svc_ssh
   pkg_storage --> svc_storage
   pkg_storage_domain --> svc_storageDomain
   pkg_storage_json --> svc_storage
@@ -286,11 +303,13 @@ flowchart LR
   pkg_subprocess_e2b --> svc_subprocess
   pkg_subprocess_local --> svc_subprocess
   pkg_system_prompt --> svc_systemPrompt
+  pkg_task_board --> svc_taskBoard
   pkg_terminal --> svc_terminals
   pkg_terminal_bash --> svc_terminals
   pkg_token_meter --> svc_tokenMeter
   pkg_tools --> svc_tools
   pkg_typert_registry --> svc_typert
+  pkg_usage_stats --> svc_usageStats
   pkg_user_questions --> svc_userQuestions
   pkg_web --> svc_web
   pkg_web_fetch_http --> svc_web
@@ -301,6 +320,8 @@ flowchart LR
   pkg_workflow --> svc_workflowEngine
   pkg_workflow_worker_thread --> svc_workflowEngine
   pkg_workspace --> svc_workspaceRegistry
+  pkg_workspace_files --> svc_workspaceFiles
+  pkg_workspace_git --> svc_workspaceGit
   svc_agentDefaultModel --> pkg_headless
   svc_agentDefaultModel --> pkg_host_apiproxy
   svc_agentLoop --> pkg_agent_spine_demo
@@ -374,6 +395,8 @@ flowchart LR
   svc_shellEnv --> pkg_tool_pwsh
   svc_skills --> pkg_tool_skill
   svc_spillStore --> pkg_spill_policy
+  svc_ssh --> pkg_client_ui_ssh
+  svc_ssh --> pkg_tool_ssh
   svc_storage --> pkg_storage_domain
   svc_storageDomain --> pkg_message_feedback
   svc_storageDomain --> pkg_workspace
@@ -392,6 +415,7 @@ flowchart LR
   svc_systemPrompt --> pkg_tool_terminal
   svc_systemPrompt --> pkg_tool_web
   svc_systemPrompt --> pkg_tools
+  svc_taskBoard --> pkg_client_ui_task_board
   svc_terminals --> pkg_tool_terminal
   svc_tokenMeter --> pkg_compaction_basic
   svc_toolResultPruner --> pkg_compaction_basic
@@ -407,6 +431,7 @@ flowchart LR
   svc_tools --> pkg_tool_web
   svc_typert --> pkg_api_gateway
   svc_typert --> pkg_typert_loader
+  svc_usageStats --> pkg_client_ui_usage_stats
   svc_userQuestions --> pkg_tool_ask_user
   svc_web --> pkg_tool_web
   svc_webServer --> pkg_connection
@@ -414,6 +439,8 @@ flowchart LR
   svc_webServer --> pkg_modules
   svc_workflowEngine --> pkg_tool_ralph
   svc_workflowEngine --> pkg_tool_workflow
+  svc_workspaceFiles --> pkg_client_ui_workspace_inspector
+  svc_workspaceGit --> pkg_client_ui_git_graph
   svc_workspaceRegistry --> pkg_apiproxy
   svc_fs -. event gate .-> pkg_fs_observation_policy
 ```
@@ -474,6 +501,11 @@ flowchart LR
 | `ctx.workflowEngine` | `seam` | [`workflow`](../packages/workflow/workflow) | [`workflow-worker-thread`](../packages/workflow/workflow-worker-thread) | [`tool-workflow`](../packages/workflow/tool-workflow), [`tool-ralph`](../packages/workflow/tool-ralph) | - | 每个上下文使用一个引擎，与 bash 相同，且没有具名提供方注册表；通用工作流与固定 Ralph 消费方启动运行，其中的 agent() 调用通过 ctx.subagents 扇出。 |
 | `ctx.lsp` | `seam` | [`lsp`](../packages/lsp/lsp) | `lsp-local` | [`tool-lsp`](../packages/lsp/tool-lsp) | - | 提供方注册与选择，加上恰好四种操作的标准化查询执行；该 seam 不提供协议逃生口，后端必须转换为标准化请求和结果。 |
 | `ctx.codegraphIndex` | `core` | [`codegraph-index`](../packages/codegraph/codegraph-index) | - | [`client-ui-codegraph`](../packages/client/ui-codegraph), [`command-codegraph-init`](../packages/codegraph/command-codegraph-init) | - | status 与 init 读取 session.header.cwd 并启动 codegraph init；/codegraph-init 是面向用户的命令消费方；面向模型的工具插件从不执行。 |
+| `ctx.taskBoard` | `core` | [`task-board`](../packages/schedule/task-board) | - | [`client-ui-task-board`](../packages/client/ui-task-board) | - | 拥有任务持久化和请求 ID 幂等性；浏览器设置区段消费其 Remote 方法。 |
+| `ctx.ssh` | `core` | [`ssh`](../packages/ssh/ssh) | - | [`tool-ssh`](../packages/ssh/tool-ssh), [`client-ui-ssh`](../packages/client/ui-ssh) | - | 拥有包含密钥的主机记录和最多一次命令分发；模型和浏览器消费方只接收不含密钥的投影。 |
+| `ctx.usageStats` | `core` | [`usage-stats`](../packages/session/usage-stats) | - | [`client-ui-usage-stats`](../packages/client/ui-usage-stats) | - | 从实时与持久本地会话的并集派生带缓存的每日和模型聚合。 |
+| `ctx.workspaceFiles` | `core` | [`workspace-files`](../packages/workspace/workspace-files) | - | [`client-ui-workspace-inspector`](../packages/client/ui-workspace-inspector) | - | 通过已登记工作区 ID 解析每次读取和变更，并拒绝路径穿越、Git 内部目录和逃出根目录的链接。 |
+| `ctx.workspaceGit` | `core` | [`workspace-git`](../packages/workspace/workspace-git) | - | [`client-ui-git-graph`](../packages/client/ui-git-graph) | - | 拥有受限 Git 子进程，以及受保护的分支、索引和工作树变更。 |
 | `ctx.apiProxy` | `core` | `apiproxy` | - | `connection` | - | 与传输无关的 Host 网关接口：它分派浏览器 API 调用，每条打开的 Host 流自行订阅转发事件，而不是由广播方法向其推送。 |
 | `ctx.dynamicCordisRunner` | `core` | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) | - | [`tool-cordis`](../packages/extensions/tool-cordis) | - | 拥有内存定义注册表、Host 半的 vm 沙箱和 request-run 往返流程；浏览器页面通过其 Remote 命名空间在线访问同一服务。 |
 | `ctx.cordisInspect` | `core` | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) | - | [`tool-cordis`](../packages/extensions/tool-cordis) | - | 注册 Host inspect 提供方、镜像 Client 提供方 manifest，并通过动态 Cordis 传输路由 Client 查询。 |

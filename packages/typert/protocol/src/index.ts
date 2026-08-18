@@ -104,6 +104,14 @@ export interface RemoteMethodMarker {
   /** Endpoint method when it differs from the implementation member. */
   readonly exportName?: string
   readonly invocation: RemoteInvocationMarker
+  /** Browser authority required by this method; omitted methods inherit trusted-host. */
+  readonly authority?: 'trusted-host' | 'loopback'
+}
+
+/** Transport authority attached to a Remote method. */
+export interface RemoteOptions {
+  /** Restrict an otherwise browser-reachable Remote method to loopback. */
+  readonly authority?: 'trusted-host' | 'loopback'
 }
 
 type RemoteMethodDecorator = <This extends object, Args extends unknown[], Result>(
@@ -121,6 +129,7 @@ interface RemoteInitializerContext<This extends object> {
 interface StoredRemoteMethodMarker {
   readonly exportName?: string
   readonly invocation: RemoteInvocationMarker
+  readonly authority?: RemoteOptions['authority']
 }
 
 const markers = new WeakMap<object, Map<string, StoredRemoteMethodMarker>>()
@@ -171,16 +180,23 @@ export function Remote<This extends object, Args extends unknown[], Result>(
 ): void
 /**
  * Mark one public instance method under a distinct exported method name.
- * @param exportName - Remote endpoint method, without a namespace or slash.
+ * @param exportName - Remote endpoint method, without a namespace or slash;
+ *   pass transport options alone to keep the method name.
+ * @param options - optional transport authority required by the exported method.
  * @returns a standard method decorator.
  */
-export function Remote(exportName: string): RemoteMethodDecorator
+export function Remote(
+  exportName: string | RemoteOptions,
+  options?: RemoteOptions,
+): RemoteMethodDecorator
 export function Remote<This extends object, Args extends unknown[], Result>(
-  methodOrExportName: string | ((this: This, ...args: Args) => Result),
-  context?: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Result>,
+  methodOrExportName: string | RemoteOptions | ((this: This, ...args: Args) => Result),
+  contextOrOptions?: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Result> | RemoteOptions,
 ): void | RemoteMethodDecorator {
   if (typeof methodOrExportName === 'string') {
     validateName('Remote export name', methodOrExportName)
+    const options = contextOrOptions as RemoteOptions | undefined
+    validateAuthority(options?.authority)
     return function <DecoratorThis extends object, DecoratorArgs extends unknown[], DecoratorResult>(
       _method: (this: DecoratorThis, ...args: DecoratorArgs) => DecoratorResult,
       decoratorContext: ClassMethodDecoratorContext<
@@ -188,11 +204,20 @@ export function Remote<This extends object, Args extends unknown[], Result>(
         (this: DecoratorThis, ...args: DecoratorArgs) => DecoratorResult
       >,
     ): void {
-      addMarkerInitializer(decoratorContext, { kind: 'direct' }, methodOrExportName)
+      addMarkerInitializer(decoratorContext, { kind: 'direct' }, methodOrExportName, options)
     }
   }
-  if (context === undefined) throw new TypeError('typert-protocol: Remote decorator context is missing')
-  addMarkerInitializer(context, { kind: 'direct' })
+  if (typeof methodOrExportName === 'object') {
+    validateAuthority(methodOrExportName.authority)
+    return function <DecoratorThis extends object, DecoratorArgs extends unknown[], DecoratorResult>(
+      _method: (this: DecoratorThis, ...args: DecoratorArgs) => DecoratorResult,
+      decoratorContext: ClassMethodDecoratorContext<DecoratorThis, (this: DecoratorThis, ...args: DecoratorArgs) => DecoratorResult>,
+    ): void {
+      addMarkerInitializer(decoratorContext, { kind: 'direct' }, undefined, methodOrExportName)
+    }
+  }
+  if (contextOrOptions === undefined || !('addInitializer' in contextOrOptions)) throw new TypeError('typert-protocol: Remote decorator context is missing')
+  addMarkerInitializer(contextOrOptions, { kind: 'direct' })
 }
 
 /**
@@ -224,13 +249,19 @@ export function RemoteScope(
 export function remoteMethods(service: object): readonly RemoteMethodMarker[] {
   const prototype = Object.getPrototypeOf(service) as object | null
   if (prototype === null) return []
-  return [...(markers.get(prototype) ?? [])].map(([method, marker]) => ({ method, ...marker }))
+  return [...(markers.get(prototype) ?? [])].map(([method, marker]) => ({
+    method,
+    ...marker.authority === undefined ? {} : { authority: marker.authority },
+    ...marker.exportName === undefined ? {} : { exportName: marker.exportName },
+    invocation: marker.invocation,
+  }))
 }
 
 function addMarkerInitializer<This extends object>(
   context: RemoteInitializerContext<This>,
   invocation: RemoteInvocationMarker,
   exportName?: string,
+  options: RemoteOptions = {},
 ): void {
   if (context.private || context.static || typeof context.name !== 'string') {
     throw new TypeError('typert-protocol: Remote decorators require a public instance method with a string name')
@@ -241,7 +272,7 @@ function addMarkerInitializer<This extends object>(
     if (prototype === null) {
       throw new TypeError(`typert-protocol: cannot mark Remote method "${method}" on an object without a prototype`)
     }
-    mark(prototype, method, invocation, exportName)
+    mark(prototype, method, invocation, exportName, options)
   })
 }
 
@@ -250,6 +281,7 @@ function mark(
   method: string,
   invocation: RemoteInvocationMarker,
   exportName?: string,
+  options: RemoteOptions = {},
 ): void {
   let table = markers.get(prototype)
   if (table === undefined) {
@@ -259,13 +291,22 @@ function mark(
   const marker: StoredRemoteMethodMarker = {
     ...(exportName === undefined || exportName === method ? {} : { exportName }),
     invocation: Object.freeze(invocation),
+    ...options.authority === undefined ? {} : { authority: options.authority },
   }
   const current = table.get(method)
   if (current !== undefined) {
-    if (current.exportName === marker.exportName && sameInvocation(current.invocation, invocation)) return
+    if (current.exportName === marker.exportName
+      && sameInvocation(current.invocation, invocation)
+      && current.authority === marker.authority) return
     throw new Error(`typert-protocol: Remote method "${method}" has conflicting invocation markers`)
   }
   table.set(method, Object.freeze(marker))
+}
+
+function validateAuthority(authority: RemoteOptions['authority']): void {
+  if (authority !== undefined && authority !== 'trusted-host' && authority !== 'loopback') {
+    throw new TypeError('typert-protocol: Remote authority must be trusted-host or loopback')
+  }
 }
 
 function sameInvocation(left: RemoteInvocationMarker, right: RemoteInvocationMarker): boolean {

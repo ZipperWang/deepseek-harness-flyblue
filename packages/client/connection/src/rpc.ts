@@ -8,7 +8,7 @@ export type ConnectionRpcAuthority = 'trusted-host' | 'loopback'
 /** Registration policy for one logical RPC channel. */
 export interface ConnectionRpcHandlerOptions {
   /** Browser authority accepted by every endpoint in this channel. */
-  readonly authority: ConnectionRpcAuthority
+  readonly authority: ConnectionRpcAuthority | ((endpoint: string) => ConnectionRpcAuthority)
 }
 
 /** Handler invoked after Connection has decoded the transport envelope. */
@@ -56,6 +56,30 @@ export interface HostConnectionRpc {
 export interface HostConnectionHandle {
   /** Generic RPC channel registry. */
   readonly rpc: HostConnectionRpc
+  /** Authority-checked registrations for binary HTTP responses and WebSocket upgrades. */
+  readonly http: HostConnectionHttp
+}
+
+/** One HTTP registration guarded by the same browser trust policy as RPC. */
+export interface ConnectionHttpOptions {
+  /** Browser authority accepted by this route. */
+  readonly authority: ConnectionRpcAuthority
+}
+
+/** Raw HTTP and upgrade handlers owned by the caller fiber. */
+export interface HostConnectionHttp {
+  /** Register an exact HTTP path after the authority check. */
+  handle(
+    path: string,
+    handler: unknown,
+    options: ConnectionHttpOptions,
+  ): () => Promise<void>
+  /** Register an exact WebSocket upgrade path after the authority check. */
+  upgrade(
+    path: string,
+    handler: unknown,
+    options: ConnectionHttpOptions,
+  ): () => Promise<void>
 }
 
 /** Client caller for logical RPC channels carried by the current transport. */

@@ -21,7 +21,7 @@ import css from './SettingsRoot.module.css'
 
 /** Nav glyph by section id; unknown ids fall back to the settings gear. */
 function navIcon(id: string) {
-  if (id === 'models') return <IconDataOutline16 className={css.navIcon} size={16} />
+  if (id === 'models' || id === 'usage-stats') return <IconDataOutline16 className={css.navIcon} size={16} />
   if (id === 'agent-presets') return <IconAgentPresetOutline16 className={css.navIcon} size={16} />
   if (id === 'plugins') return <IconPersonalizationOutline16 className={css.navIcon} size={16} />
   if (id === 'codegraph') return <IconCodeOutline16 className={css.navIcon} size={16} />

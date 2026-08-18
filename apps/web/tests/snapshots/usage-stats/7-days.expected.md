@@ -1,0 +1,69 @@
+- heading "用量统计" [level=2]
+- paragraph: 基于此设备上的全部会话日志统计，不包含费用、余额或套餐信息。
+- button "刷新"
+- button "最近 7 天" [pressed]
+- button "最近 30 天"
+- article:
+  - text: Token 总量
+  - strong: "111"
+- article:
+  - text: 会话数
+  - strong: "1"
+- article:
+  - text: 消息数
+  - strong: "4"
+- article:
+  - text: 活跃天数
+  - strong: 2 / 7
+- article:
+  - text: 当前连续活跃
+  - strong: 1 天
+- article:
+  - text: 最常用模型
+  - strong: deepseek-reasoner
+  - text: 61.3% · deepseek
+- article:
+  - heading "消息活跃度" [level=3]
+  - paragraph: 每格代表一个 Host 日历日，颜色越深表示可见消息越多。
+  - list "消息活跃度":
+    - 'listitem "2026年8月12日: 0 条消息"'
+    - 'listitem "2026年8月13日: 0 条消息"'
+    - 'listitem "2026年8月14日: 0 条消息"'
+    - 'listitem "2026年8月15日: 0 条消息"'
+    - 'listitem "2026年8月16日: 2 条消息"'
+    - 'listitem "2026年8月17日: 0 条消息"'
+    - 'listitem "2026年8月18日: 2 条消息"'
+- article:
+  - heading "每日 Token 趋势" [level=3]
+  - paragraph: 所选范围共有 111 Token 和 4 条可见消息。
+  - list "每日 Token 趋势":
+    - 'listitem "2026年8月12日: 0 Token"': 8月12日
+    - 'listitem "2026年8月13日: 0 Token"': 8月13日
+    - 'listitem "2026年8月14日: 0 Token"': 8月14日
+    - 'listitem "2026年8月15日: 0 Token"': 8月15日
+    - 'listitem "2026年8月16日: 68 Token"': 8月16日
+    - 'listitem "2026年8月17日: 0 Token"': 8月17日
+    - 'listitem "2026年8月18日: 43 Token"': 8月18日
+- article:
+  - heading "模型用量" [level=3]
+  - img "按 Token 展示 2 个模型。"
+  - list:
+    - listitem:
+      - text: deepseek-reasoner deepseek
+      - strong: "68"
+    - listitem:
+      - text: local-model openai-compatible
+      - strong: "43"
+- article:
+  - heading "Token 构成" [level=3]
+  - text: 未缓存输入
+  - strong: "80"
+  - text: 输出
+  - strong: "25"
+  - text: 缓存读取
+  - strong: "6"
+  - text: 缓存写入
+  - strong: "0"
+  - paragraph: 其中推理 Token 为 4，已包含在输出中，不重复计入总量。
+- group: 查看完整明细
+- paragraph: 生成于 {{clock}} · Asia/Shanghai

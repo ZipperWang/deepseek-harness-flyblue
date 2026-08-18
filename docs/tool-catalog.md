@@ -33,6 +33,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`, `ctx.workflowEngine`, `ctx.subagents`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents every fresh round)` | `tool/call`, `tool/result`, `workflow and child session events during execution` | - | A fixed foreground workflow starts one fresh structured child per round; the model selects only the immutable objective and an optional round cap. |
 | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`, `ctx.agents`, `ctx.skills` | `tool/call`, `tool/result`, `user/message replacement catalogs via agent.inject()` | - | - |
 | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`, `session_event_search`, `session_event_trace`, `session_search`, `session_trace` | `ctx.tools`, `ctx.systemPrompt`, `ctx.sessionQuery`, `a calling Agent for workspace authority` | `tool/call`, `tool/result` | - | The five read-only tools hide provider cursors and authorize every result from the immutable calling agent session. The package is opt-in; compositions that need enforced deadlines or bounded inline output also mount the generic timeout or spill policies. |
+| `@deepseek-ai/dsh-tool-ssh` | `ssh_exec`, `ssh_list` | `ctx.tools`, `ctx.ssh` | `tool/call`, `tool/result`, `one remote SSH command for ssh_exec` | - | The optional tools appear only when the host SSH service is mounted. ssh_exec dispatches each command once and marks a post-dispatch connection loss as an unknown result so callers do not replay a non-idempotent command automatically. |
 | `@deepseek-ai/dsh-tool-subagent` | `subagent` | `ctx.tools`, `ctx.subagents`, `ctx.systemPrompt` | `tool/call`, `tool/result`, `child session events through the chosen provider` | `subagent`, `subagent_fork` | The registered tool name is the load-time `toolName` config (default `subagent`); the schema above is that default. The shipped compositions load this package once per subagent backend, so the model additionally sees `subagent_fork` bound to the fork backend. Each instance's description, `run_in_background` parameter, and system-prompt policy follow its own `backgroundMode` and `enableRunInBackground`, so the two shipped schemas are not identical: `subagent` is `continuable` and defaults omitted calls to background with automatic settlement delivery, while `subagent_fork` stays `one-shot` and defaults them to foreground — see `packages/bundle/base/cordis.patch.yml` and `examples/acp-agent/cordis.yml`. |
 | `@deepseek-ai/dsh-tool-subagent-control` | `interrupt_agent`, `list_agents`, `send_message` | `ctx.tools`, `ctx.subagents`, `ctx.agents and ctx.sessionProjections (list_agents only)` | `tool/call`, `tool/result`, `child session events through ctx.subagents` | - | The globally named control tools over continuable background subagents: provider-bound `tool-subagent` instances register distinct delegation tools, while this package registers `send_message` and `interrupt_agent` once, plus `list_agents` from its separately loaded `/list-agents` plugin (whose catalog rows use the sessionProjections and live Agent registries). |
 | `@deepseek-ai/dsh-tool-subagent-report` | `report` | `ctx.subagents`, `ctx.systemPrompt`, `a live continuable in-process child Agent` | `tool/call`, `tool/result`, `a user-role message in the direct parent session` | - | Registered per continuable in-process child rather than globally, so this schema is visible only inside such a child and survives its global `toolFilter`. The same contribution installs the child-scoped `tool:report` prompt section, which this catalog does not render. The parent-facing `send_message` tool is installed independently. |
@@ -1503,6 +1504,51 @@ Read the authorized session lineage around one session, including complete visib
 Source: [`packages/session-query/tool-session-query/src/index.ts`](../packages/session-query/tool-session-query/src/index.ts)
 
 The five read-only tools hide provider cursors and authorize every result from the immutable calling agent session. The package is opt-in; compositions that need enforced deadlines or bounded inline output also mount the generic timeout or spill policies.
+
+<a id="deepseek-aidsh-tool-ssh"></a>
+
+## `@deepseek-ai/dsh-tool-ssh`
+
+### `ssh_exec`
+
+Run one command exactly once on a configured SSH host. A result-unknown response means the connection dropped after dispatch; do not repeat non-idempotent commands automatically.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "host_id": {
+      "type": "string",
+      "description": "Configured SSH host id."
+    },
+    "command": {
+      "type": "string",
+      "description": "Command to run remotely."
+    }
+  },
+  "required": [
+    "host_id",
+    "command"
+  ]
+}
+```
+
+Source: [`packages/ssh/tool-ssh/src/index.ts`](../packages/ssh/tool-ssh/src/index.ts)
+
+### `ssh_list`
+
+List configured remote SSH hosts. Secrets are never returned.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/ssh/tool-ssh/src/index.ts`](../packages/ssh/tool-ssh/src/index.ts)
+
+The optional tools appear only when the host SSH service is mounted. ssh_exec dispatches each command once and marks a post-dispatch connection loss as an unknown result so callers do not replay a non-idempotent command automatically.
 
 <a id="deepseek-aidsh-tool-subagent"></a>
 

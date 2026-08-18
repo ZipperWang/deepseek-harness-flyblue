@@ -48,6 +48,11 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
       request: { readonly objective: string },
       signal?: AbortSignal,
     ) => Promise<RemoteResult<{ readonly ref: string }>>
+    'probe/remove': (
+      agentId: string,
+      request: { readonly objective: string },
+      signal?: AbortSignal,
+    ) => Promise<RemoteResult<{ readonly ref: string }>>
     'probe/maybe': (value: string | null | undefined) => Promise<RemoteResult<string | null | undefined>>
   }
 
@@ -371,7 +376,7 @@ describe('Client Typert API', () => {
     })).rejects.toThrow('scoped method probe/rename is already mounted')
     await expect(ctx.remote.$mount({
       package: '@fixture/service-method-conflict',
-      descriptors: [{ ...context, id: '@fixture/probe#probe/remove', method: 'remove' }],
+      descriptors: [{ ...context, id: '@fixture/probe#probe/installDirect', method: 'installDirect' }],
     })).rejects.toThrow('conflicts with its namespace service')
     const scopedService = ctx.get('remote.probe') as unknown as object
     Object.defineProperty(scopedService, 'custom', { configurable: true, value: () => undefined })
@@ -402,6 +407,30 @@ describe('Client Typert API', () => {
       expect.any(AbortSignal),
     )
     await disposeMultipleScoped()
+  })
+
+  it('mounts and withdraws a Remote method named remove', async () => {
+    const call = vi.fn<ConnectionHandle['rpc']['call']>()
+      .mockResolvedValue({ ok: true, value: { ref: 'removed-1' } })
+    const ctx = await bench(call)
+    const descriptor: InvocationDescriptor = {
+      ...directDescriptor(),
+      id: '@fixture/probe#probe/remove',
+      method: 'remove',
+    }
+    const dispose = await ctx.remote.$mount({ package: '@fixture/remove', descriptors: [descriptor] })
+
+    await expect(ctx.remote.probe.remove('agent-1', { objective: 'retire' }))
+      .resolves.toEqual({ ok: true, value: { ref: 'removed-1' } })
+    expect(call).toHaveBeenCalledWith(
+      '/api',
+      'probe/remove',
+      { args: { agentId: 'agent-1', request: { objective: 'retire' } } },
+      expect.any(AbortSignal),
+    )
+
+    await dispose()
+    expect((ctx.remote as unknown as Record<string, unknown>).probe).toBeUndefined()
   })
 
   it('rolls back earlier descriptors when a later descriptor fails to install', async () => {

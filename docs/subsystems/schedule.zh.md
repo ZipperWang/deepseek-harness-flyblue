@@ -184,3 +184,61 @@ type ScheduleView = ScheduleRecord & {
 到期工作会先等待 Agent 完全 idle 并认领 maintenance phase，再重新折叠状态、采样本次判断、将一个 `followup()` 排入队列，并追加对应的 dispatch 变更。它绝不会调用 `steer()`，也绝不会中断当前轮次。
 
 获得准入的一次性提醒或固定速率批次会启动一个普通的后续轮次，且只通过普通对话 transcript（文本记录）出现；Schedule 不提供独立的持久 Web 回执或浏览器渲染器。如果 framing 构造或同步队列准入失败，则不会记录 dispatch，提醒仍保持活动。队列准入后、持久 dispatch 前的狭窄崩溃窗口可能使提醒内容在恢复后重复，因此该边界提供的是尽力而为的至少一次交付，而非恰好一次交付。
+
+<!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
+
+<a id="cordis-surface"></a>
+
+## Cordis API
+
+Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — this section is byte-identical in both language sides of the page. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
+
+<a id="ctxtaskboard--taskboardservice"></a>
+
+### `ctx.taskBoard` — `TaskBoardService`
+
+Task service with request-id idempotence and locked ledger publication.
+
+```ts cordis-catalog
+/**
+ * Read task-board state.
+ * @returns Copies of every durable task in ledger order.
+ */
+@Remote async list(): Promise<TaskView[]>
+
+/**
+ * Create a task; repeating the same request id returns the original result.
+ * @param title - User-visible task title; surrounding whitespace is removed.
+ * @param requestId - Browser-generated idempotency key for this mutation.
+ * @returns The created task or the result previously stored for the request id.
+ */
+@Remote async create(title: string, requestId: string): Promise<TaskView>
+
+/**
+ * Archive a task with an idempotent request id.
+ * @param id - Durable task to archive.
+ * @param requestId - Browser-generated idempotency key for this mutation.
+ * @returns The archived task or the result previously stored for the request id.
+ */
+@Remote async archive(id: TaskId, requestId: string): Promise<TaskView>
+
+/**
+ * Change an active task title through an idempotent browser action.
+ * @param id - Durable task to update.
+ * @param title - Replacement title; surrounding whitespace is removed.
+ * @param requestId - Browser-generated idempotency key for this mutation.
+ * @returns The updated task or the result previously stored for the request id.
+ */
+@Remote async update(id: TaskId, title: string, requestId: string): Promise<TaskView>
+
+/**
+ * Permanently remove an archived task through an idempotent action.
+ * @param id - Archived task to remove.
+ * @param requestId - Browser-generated idempotency key for this mutation.
+ * @returns The removed task or the result previously stored for the request id.
+ */
+@Remote async remove(id: TaskId, requestId: string): Promise<TaskView>
+```
+
+Source: [`packages/schedule/task-board/src/index.ts:27`](../../packages/schedule/task-board/src/index.ts)
+<!-- END GENERATED cordis-surface -->

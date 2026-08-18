@@ -255,3 +255,7 @@
   config:
     fetch: false
     searchTimeoutMs: 60000
+
+# This consumer remains inert in headless compositions without `ssh`.
+- id: tool-ssh
+  name: '@deepseek-ai/dsh-tool-ssh'

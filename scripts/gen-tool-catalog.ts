@@ -57,6 +57,8 @@ import Lsp from '@deepseek-ai/dsh-lsp'
 import * as ToolLsp from '@deepseek-ai/dsh-tool-lsp'
 import * as ToolSkill from '@deepseek-ai/dsh-tool-skill'
 import * as ToolSessionQuery from '@deepseek-ai/dsh-tool-session-query'
+import SshService from '@deepseek-ai/dsh-ssh'
+import * as ToolSsh from '@deepseek-ai/dsh-tool-ssh'
 import * as ToolTasks from '@deepseek-ai/dsh-tool-jobs'
 import * as ToolTodo from '@deepseek-ai/dsh-tool-todo'
 import * as ToolSubagent from '@deepseek-ai/dsh-tool-subagent'
@@ -447,6 +449,19 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'The five read-only tools hide provider cursors and authorize every result from the immutable calling agent session. The package is opt-in; compositions that need enforced deadlines or bounded inline output also mount the generic timeout or spill policies.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-ssh',
+    dir: 'tool-ssh',
+    source: 'packages/ssh/tool-ssh/src/index.ts',
+    requires: ['ctx.tools', 'ctx.ssh'],
+    writes: ['tool/call', 'tool/result', 'one remote SSH command for ssh_exec'],
+    async mount(ctx) {
+      await ctx.plugin(SshService)
+      await ctx.plugin(ToolSsh)
+    },
+    note:
+      'The optional tools appear only when the host SSH service is mounted. ssh_exec dispatches each command once and marks a post-dispatch connection loss as an unknown result so callers do not replay a non-idempotent command automatically.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-subagent',

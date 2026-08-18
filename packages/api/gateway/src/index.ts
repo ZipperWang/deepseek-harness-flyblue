@@ -106,7 +106,7 @@ export class TypertGatewayService extends Service implements TypertGateway {
         '/api',
         endpoint => this.claimsEndpoint(endpoint),
         (endpoint, payload, signal) => this.dispatchRpc(endpoint, payload, signal),
-        { authority: 'trusted-host' },
+        { authority: endpoint => this.authorityForEndpoint(endpoint) },
       )
     })
   }
@@ -117,6 +117,23 @@ export class TypertGatewayService extends Service implements TypertGateway {
     if (this.ctx.typert.local.get(endpoint) !== undefined || this.ctx.typert.local.hasSeen(endpoint)) return true
     this.srcClaims ??= this.collectSrcClaims()
     return this.srcClaims.has(endpoint)
+  }
+
+  /** Resolve per-method authority from the live Remote marker. */
+  private authorityForEndpoint(endpoint: string): 'trusted-host' | 'loopback' {
+    const [namespace, method] = endpoint.split('/')
+    if (namespace === undefined || method === undefined) return 'trusted-host'
+    for (const [serviceKey, definition] of Object.entries(this.ctx.reflect.props)) {
+      if (definition.type !== 'service') continue
+      const receiver = this.ctx.get(serviceKey) as unknown
+      if (!isObject(receiver)) continue
+      const original = originalOf(receiver)
+      const binding = Reflect.get(original, 'typertRemote') as unknown
+      if (!isObject(binding) || Reflect.get(binding, 'namespace') !== namespace) continue
+      const marker = remoteMethods(original).find(candidate => (candidate.exportName ?? candidate.method) === method)
+      if (marker !== undefined) return marker.authority ?? 'trusted-host'
+    }
+    return 'trusted-host'
   }
 
   private collectSrcClaims(): ReadonlySet<string> {

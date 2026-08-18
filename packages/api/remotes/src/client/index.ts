@@ -7,6 +7,11 @@ import dynamicRemote from '@deepseek-ai/dsh-cordis-host-runner/remote'
 import pluginInventoryRemote from '@deepseek-ai/dsh-host-plugin-inventory/remote'
 import messageFeedbackRemote from '@deepseek-ai/dsh-message-feedback/remote'
 import codegraphIndexRemote from '@deepseek-ai/dsh-codegraph-index/remote'
+import usageStatsRemote from '@deepseek-ai/dsh-usage-stats/remote'
+import taskBoardRemote from '@deepseek-ai/dsh-task-board/remote'
+import workspaceGitRemote from '@deepseek-ai/dsh-workspace-git/remote'
+import workspaceFilesRemote from '@deepseek-ai/dsh-workspace-files/remote'
+import sshRemote from '@deepseek-ai/dsh-ssh/remote'
 import type { TypertClientRemote } from '@deepseek-ai/dsh-typert-protocol'
 
 export type { TypertClientRemote as ClientRemote } from '@deepseek-ai/dsh-typert-protocol'
@@ -16,6 +21,11 @@ export type {} from '@deepseek-ai/dsh-goal/remote'
 export type {} from '@deepseek-ai/dsh-host-plugin-inventory/remote'
 export type {} from '@deepseek-ai/dsh-message-feedback/remote'
 export type {} from '@deepseek-ai/dsh-codegraph-index/remote'
+export type {} from '@deepseek-ai/dsh-usage-stats/remote'
+export type {} from '@deepseek-ai/dsh-task-board/remote'
+export type {} from '@deepseek-ai/dsh-workspace-git/remote'
+export type {} from '@deepseek-ai/dsh-workspace-files/remote'
+export type {} from '@deepseek-ai/dsh-ssh/remote'
 // The forwarded-event allowlist's selection seat: without it in the consumer's
 // compilation face `TypertRemoteEvent` is `never` and every `$on` call fails.
 export type { ApiRemoteForwardedEvent } from '../types.ts'
@@ -109,7 +119,8 @@ export async function apply(ctx: Context): Promise<() => Promise<void>> {
   try {
     for (const contribution of [
       commandsRemote, goalsRemote, dynamicRemote, pluginInventoryRemote, messageFeedbackRemote,
-      codegraphIndexRemote,
+      codegraphIndexRemote, usageStatsRemote, taskBoardRemote, workspaceGitRemote,
+      workspaceFilesRemote, sshRemote,
     ]) {
       disposers.push(await ctx.remote.$mount(contribution))
     }
