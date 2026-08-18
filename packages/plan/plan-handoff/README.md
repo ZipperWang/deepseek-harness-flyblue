@@ -16,8 +16,8 @@ An approved review also appends `plan/approved` `{ execution, title }`. A clear 
 
 `exit_plan_mode` stays registered in both states. In plan mode it requires a markdown plan starting with a `#` heading and asks through `ctx.userQuestions` with four options:
 
-- `Approve and execute` — after the source agent is idle, create a sibling session (same cwd, model, and preset), attach it to the same workspace, log `plan/handoff`, and steer the full plan into the child.
-- `Approve and compact context` — `compactNow` on this session, then steer the full plan. Cancellation skips the steer. Failure falls back to keep.
+- `Approve and execute` — conclude the current turn, then after the source agent is idle, create a sibling session (same cwd, model, and preset), attach it to the same workspace, log `plan/handoff`, and steer the full plan into the child.
+- `Approve and compact context` — conclude the current turn, then `compactNow` on this session, then steer the full plan. Compaction is resolved through `AgentPresets.serviceFor(agent, 'compaction')` (the shipped isolated preset realm) or host `ctx.compaction`. Cancellation skips the steer. Failure or a missing engine falls back to keep.
 - `Approve and keep context` — steer the full plan into this session.
 - `Refine plan` — stay in plan mode; feedback returns as a failed call.
 
@@ -71,6 +71,7 @@ Mode transitions do not change the tool catalog. Compact replaces a surface pref
 ## Known Limitations and Deferred Work
 
 - **Clear needs a session factory** — without `ctx.agents` the path falls back to compact-then-steer, which is the TUI/headless case.
+- **Compact needs a reachable engine** — without `AgentPresets.serviceFor(agent, 'compaction')` or host `ctx.compaction` the path keeps context.
 - **No plan files** — the approved markdown lives on the tool argument and is copied into the execution prompt; there is no `local://` artifact.
 - **Soft guidance only** — a model that ignores the section can still mutate; configure sandbox and approval independently.
 - **User-copied presets that still name `@deepseek-ai/dsh-plan-mode`** fail to load until that row is renamed.

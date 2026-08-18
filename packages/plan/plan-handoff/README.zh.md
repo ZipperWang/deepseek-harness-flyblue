@@ -16,8 +16,8 @@
 
 `exit_plan_mode` 在两种状态下都保持注册。在 plan mode 中，它要求以 `#` 标题开头的 markdown 计划，并通过 `ctx.userQuestions` 提供四个选项：
 
-- `Approve and execute` — 源 agent 空闲后创建兄弟会话（相同 cwd、模型与 preset），挂到同一 workspace，记录 `plan/handoff`，并把完整计划 steer 进子会话。
-- `Approve and compact context` — 对本会话 `compactNow`，再 steer 完整计划。取消则不 steer。失败则回退为保留上下文。
+- `Approve and execute` — 结束当前轮次，源 agent 空闲后创建兄弟会话（相同 cwd、模型与 preset），挂到同一 workspace，记录 `plan/handoff`，并把完整计划 steer 进子会话。
+- `Approve and compact context` — 结束当前轮次，对本会话 `compactNow`，再 steer 完整计划。压缩服务通过 `AgentPresets.serviceFor(agent, 'compaction')`（已交付 preset 的 isolate realm）或宿主 `ctx.compaction` 解析。取消则不 steer。失败或找不到引擎则回退为保留上下文。
 - `Approve and keep context` — 把完整计划 steer 进本会话。
 - `Refine plan` — 留在 plan mode；反馈作为失败调用返回。
 
@@ -71,6 +71,7 @@ Plan mode 激活时，模型在提示词顺序 50 处看到部署的精确 `sect
 ## Known Limitations and Deferred Work
 
 - **清空需要会话工厂** — 没有 `ctx.agents` 时回退为压缩后执行，这是 TUI/headless 路径。
+- **压缩需要能解析到引擎** — 没有 `AgentPresets.serviceFor(agent, 'compaction')` 或宿主 `ctx.compaction` 时回退为保留上下文。
 - **不落盘计划文件** — 已批准的 markdown 留在工具参数中，并复制进执行提示；没有 `local://` 产物。
 - **仅软性指引** — 忽略该段落的模型仍可改动工作区；沙箱与审批需单独配置。
 - **仍写 `@deepseek-ai/dsh-plan-mode` 的用户复制 preset** 在改行名之前会加载失败。

@@ -7,11 +7,25 @@
 import { randomUUID } from 'node:crypto'
 import type { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
+import type {} from '@deepseek-ai/dsh-agent-presets'
 import { ManualCompactionError } from '@deepseek-ai/dsh-compaction'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { SessionId } from '@deepseek-ai/dsh-session'
 import type { PlanExecution } from './types.ts'
 import { approvedPlanPrompt } from './prompts.ts'
+
+/**
+ * The session's compaction engine: the preset isolate first, then the host
+ * plane. Shipped presets mount `compaction` behind `isolate`, which
+ * `ctx.get('compaction')` on the agent or plan-handoff fiber cannot see.
+ *
+ * @param host - plan-handoff service context (not the source agent scope).
+ * @param agent - session whose mounted composition to search.
+ * @returns that session's engine, or undefined when none is composed.
+ */
+function resolveCompaction(host: Context, agent: Agent) {
+  return host.get('agentPresets')?.serviceFor(agent, 'compaction') ?? host.get('compaction')
+}
 
 /** Approved plan waiting for the source agent to become idle. */
 export interface PendingHandoff {
@@ -54,17 +68,19 @@ export function steerApprovedPlan(
 /**
  * Compact this session then steer the full plan. Cancellation skips the steer.
  *
+ * @param host - plan-handoff service context, used to resolve compaction.
  * @param agent - idle source agent that can runMaintenance.
  * @param plan - approved markdown, embedded after compaction.
  * @param signal - forwarded to compactNow.
  * @returns compacted, cancelled, or kept when no compaction service exists.
  */
 export async function compactThenExecute(
+  host: Context,
   agent: Agent,
   plan: string,
   signal: AbortSignal,
 ): Promise<Extract<HandoffOutcome, { kind: 'compacted' | 'compact-cancelled' | 'kept' }>> {
-  const compaction = agent.ctx.get('compaction')
+  const compaction = resolveCompaction(host, agent)
   if (compaction === undefined) {
     steerApprovedPlan(agent, plan, true)
     return { kind: 'kept' }
@@ -75,7 +91,7 @@ export async function compactThenExecute(
     if (error instanceof ManualCompactionError && error.code === 'cancelled') {
       return { kind: 'compact-cancelled' }
     }
-    agent.ctx.logger.warn('dsh-plan-handoff: compaction failed; executing with current context: %o', error)
+    host.logger.warn('dsh-plan-handoff: compaction failed; executing with current context: %o', error)
     steerApprovedPlan(agent, plan, true)
     return { kind: 'kept' }
   }
@@ -100,7 +116,7 @@ export async function clearThenExecute(
 ): Promise<Extract<HandoffOutcome, { kind: 'cleared' | 'cleared-fallback' }>> {
   const agents = host.get('agents')
   if (agents === undefined) {
-    await compactThenExecute(source, plan, new AbortController().signal)
+    await compactThenExecute(host, source, plan, new AbortController().signal)
     return { kind: 'cleared-fallback' }
   }
 
@@ -137,7 +153,7 @@ export async function clearThenExecute(
     return { kind: 'cleared', childSessionId: childId }
   } catch (error: unknown) {
     host.logger.warn('dsh-plan-handoff: failed to create execution session; falling back: %o', error)
-    await compactThenExecute(source, plan, new AbortController().signal)
+    await compactThenExecute(host, source, plan, new AbortController().signal)
     return { kind: 'cleared-fallback' }
   }
 }
@@ -160,7 +176,7 @@ export async function runHandoff(
       steerApprovedPlan(agent, pending.plan, true)
       return { kind: 'kept' }
     case 'compact':
-      return compactThenExecute(agent, pending.plan, new AbortController().signal)
+      return compactThenExecute(host, agent, pending.plan, new AbortController().signal)
     case 'clear':
       return clearThenExecute(host, agent, pending.plan, pending.title)
     default: {

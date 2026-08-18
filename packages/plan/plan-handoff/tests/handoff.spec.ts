@@ -96,6 +96,7 @@ describe('approved execution handoff', () => {
     expect(result.isError).toBe(false)
     if (result.isError) throw new Error('expected approval')
     expect(result.value).toEqual({ approved: true, execution: 'keep' })
+    expect(result.concludesTurn).toBeUndefined()
     expect(steered).toHaveLength(1)
     expect(steered[0]?.content[0]).toMatchObject({ type: 'text' })
     expect(agent.session.events.some(event => event.type === 'plan/approved')).toBe(true)
@@ -109,10 +110,42 @@ describe('approved execution handoff', () => {
       status: 'idle',
       steer: (message) => { steered.push(message) },
     })
-    agent.ctx.provide('compaction', { compactNow } as never)
+    ctx.provide('compaction', { compactNow } as never)
+    const result = await callExit(ctx, agent, APPROVE_COMPACT)
+    expect(result.isError).toBe(false)
+    expect(result.concludesTurn).toBe(true)
+    expect(compactNow).toHaveBeenCalledOnce()
+    expect(steered).toHaveLength(1)
+  })
+
+  it('compact resolves an isolated preset compaction service', async () => {
+    const ctx = await setup()
+    const compactNow = vi.fn(async () => null)
+    const steered: UserMessage[] = []
+    const agent = await agentWithSession(ctx, 'isolated-compact', {
+      status: 'idle',
+      steer: (message) => { steered.push(message) },
+    })
+    ctx.provide('agentPresets', {
+      serviceFor: (_subject: unknown, name: string) => name === 'compaction' ? { compactNow } : undefined,
+    } as never)
     const result = await callExit(ctx, agent, APPROVE_COMPACT)
     expect(result.isError).toBe(false)
     expect(compactNow).toHaveBeenCalledOnce()
+    expect(steered).toHaveLength(1)
+  })
+
+  it('compact does not see an isolated engine without serviceFor', async () => {
+    const ctx = await setup()
+    const compactNow = vi.fn(async () => null)
+    const steered: UserMessage[] = []
+    const agent = await agentWithSession(ctx, 'isolated-miss', {
+      status: 'idle',
+      steer: (message) => { steered.push(message) },
+    })
+    ctx.isolate('compaction').provide('compaction', { compactNow } as never)
+    await callExit(ctx, agent, APPROVE_COMPACT)
+    expect(compactNow).not.toHaveBeenCalled()
     expect(steered).toHaveLength(1)
   })
 
@@ -123,10 +156,11 @@ describe('approved execution handoff', () => {
       status: 'idle',
       steer: (message) => { steered.push(message) },
     })
-    agent.ctx.provide('compaction', {
+    ctx.provide('compaction', {
       compactNow: () => Promise.reject(new ManualCompactionError('cancelled', 'cancelled')),
     } as never)
-    await callExit(ctx, agent, APPROVE_COMPACT)
+    const result = await callExit(ctx, agent, APPROVE_COMPACT)
+    expect(result.concludesTurn).toBe(true)
     expect(steered).toHaveLength(0)
   })
 
@@ -137,7 +171,7 @@ describe('approved execution handoff', () => {
       status: 'idle',
       steer: (message) => { steered.push(message) },
     })
-    agent.ctx.provide('compaction', {
+    ctx.provide('compaction', {
       compactNow: () => Promise.reject(new Error('summarizer down')),
     } as never)
     await callExit(ctx, agent, APPROVE_COMPACT)
@@ -155,6 +189,7 @@ describe('approved execution handoff', () => {
     expect(result.isError).toBe(false)
     if (result.isError) throw new Error('expected approval')
     expect(result.value).toEqual({ approved: true, execution: 'clear' })
+    expect(result.concludesTurn).toBe(true)
     expect(steered).toHaveLength(1)
     expect(agent.session.events.some(event => event.type === 'plan/handoff')).toBe(false)
   })

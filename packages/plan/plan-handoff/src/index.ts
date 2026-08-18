@@ -414,6 +414,10 @@ export class PlanModeController extends Service {
         }
         this.pendingIntents.set(agent.session, { active: false, narrate: false })
         this.pendingHandoffs.set(agent.session, { execution, plan: args.plan, title })
+        // Compact and clear need the source idle before they can run. Ending
+        // this turn prevents a same-turn model step from executing against the
+        // uncompacted planning transcript.
+        if (execution === 'compact' || execution === 'clear') exec.concludeTurn()
         if (agent.status === 'idle') {
           const pending = this.pendingHandoffs.get(agent.session)
           if (pending !== undefined) {
