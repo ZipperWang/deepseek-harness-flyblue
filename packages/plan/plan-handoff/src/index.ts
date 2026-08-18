@@ -17,10 +17,13 @@
  * or leaving plan mode changes only the prompt section, not the request tool
  * catalog.
  *
- * Agent Note:
- * - .agents/notes/implemented/simplification/2026-07-22-plan-specific-collaboration-state.md
+ * After an approved review the plugin waits for the source agent to go idle,
+ * then keeps context, compacts, or opens a sibling session.
  *
- * @module @deepseek-ai/dsh-plan-mode
+ * Agent Note:
+ * - .agents/notes/implemented/feature/2026-08-19-plan-handoff.md
+ *
+ * @module @deepseek-ai/dsh-plan-handoff
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'
@@ -36,23 +39,24 @@ import { UserQuestionError } from '@deepseek-ai/dsh-user-questions'
 import type {} from '@deepseek-ai/dsh-commands'
 // Type-only: resolves ctx.sessionProjections for the optional unit child.
 import type {} from '@deepseek-ai/dsh-session-projection'
-import type { PlanProjection } from './types.ts'
-// The `plan` projection-key declaration lives in src/types.ts (its one home);
-// this re-export projects the type face onto the package root AND keeps the
-// module edge in the emitted index.d.ts, so aggregate programs consuming the
-// declarations still receive the SessionProjectionMap merge.
+import type { PlanExecution, PlanProjection } from './types.ts'
+import {
+  APPROVE_COMPACT, APPROVE_EXECUTE, APPROVE_KEEP, APPROVE_LABELS, REFINE_PLAN,
+  approvedResultText,
+} from './prompts.ts'
+import { runHandoff, type PendingHandoff } from './handoff.ts'
+import type {} from '@deepseek-ai/dsh-compaction'
+import type {} from '@deepseek-ai/dsh-agent-presets'
+import type {} from '@deepseek-ai/dsh-workspace'
+// The `plan` projection-key and session-event declarations live in
+// src/types.ts (their one home); this re-export projects that type face onto
+// the package root AND keeps the module edge in the emitted index.d.ts, so
+// aggregate programs consuming the declarations still receive the merges.
 export type * from './types.ts'
-
-declare module '@deepseek-ai/dsh-session/types' {
-  interface SessionEventMap {
-    /**
-     * Whether plan mode is in force from this point on: log-only, non-surface,
-     * whole-value replace. The last `plan/mode` wins; a log with none folds to
-     * inactive through {@link foldPlanMode}.
-     */
-    'plan/mode': { active: boolean }
-  }
-}
+export {
+  APPROVE_COMPACT, APPROVE_EXECUTE, APPROVE_KEEP, APPROVE_LABELS, REFINE_PLAN,
+  approvedPlanPrompt, approvedResultText,
+} from './prompts.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -75,17 +79,26 @@ export interface PlanModeConfig {
 /** The review question's id, echoed in the answer this tool reads. */
 const REVIEW_ID = 'plan-review'
 
-/** The review question's approve option label. */
-const APPROVE_LABEL = 'Approve'
-
-/** The review question's keep-planning option label. */
-const KEEP_PLANNING_LABEL = 'Keep planning'
-
 const EXIT_DESCRIPTION
   = 'Use only in plan mode. Present your plan for the user\'s review and, on approval, leave plan mode. '
   + 'Send the COMPLETE plan as markdown, starting with a # heading that names it. '
-  + 'The user may approve (carry out the plan from your next step) or keep '
-  + 'planning — their feedback comes back in the tool result; revise and present again.'
+  + 'The user may approve and execute (fresh session), approve and compact context, '
+  + 'approve and keep context, or refine the plan — their feedback comes back in '
+  + 'the tool result; revise and present again.'
+
+/** Map a review label to an execution mode, or undefined when the label refines. */
+function executionOf(label: string): PlanExecution | undefined {
+  switch (label) {
+    case APPROVE_EXECUTE:
+      return 'clear'
+    case APPROVE_COMPACT:
+      return 'compact'
+    case APPROVE_KEEP:
+      return 'keep'
+    default:
+      return undefined
+  }
+}
 
 /** The plan's first markdown heading (any level), or `undefined` when it has none. */
 function firstHeading(plan: string): string | undefined {
@@ -194,6 +207,9 @@ export class PlanModeController extends Service {
    */
   private readonly pendingIntents = new WeakMap<Session, { active: boolean; narrate: boolean }>()
 
+  /** Approved execution waiting for the source agent to become idle. */
+  private readonly pendingHandoffs = new WeakMap<Session, PendingHandoff>()
+
   constructor(ctx: Context, config: PlanModeConfig = { section: '' }) {
     super(ctx, 'planMode')
     this.section = resolveConfig(config).section
@@ -213,14 +229,23 @@ export class PlanModeController extends Service {
       try {
         this.onBoundary(agent.session)
       } catch (error) {
-        ctx.logger.warn('dsh-plan-mode: failed to append selected plan mode at step start: %o', error)
+        ctx.logger.warn('dsh-plan-handoff: failed to append selected plan mode at step start: %o', error)
         return decision
       }
       return !pending.narrate || narration === undefined
         ? decision
         : { ...decision, messages: [...decision.messages, narration] }
     })
-    ctx.effect(() => () => { disposed = true }, 'dsh-plan-mode: close service lifetime')
+    ctx.on('agent/status', ({ agent, status }) => {
+      if (status !== 'idle' || disposed) return
+      const pending = this.pendingHandoffs.get(agent.session)
+      if (pending === undefined) return
+      this.pendingHandoffs.delete(agent.session)
+      void runHandoff(this.ctx, agent, pending).catch((error: unknown) => {
+        ctx.logger.warn('dsh-plan-handoff: idle handoff failed: %o', error)
+      })
+    })
+    ctx.effect(() => () => { disposed = true }, 'dsh-plan-handoff: close service lifetime')
 
     ctx.systemPrompt.section({
       name: 'plan:policy',
@@ -314,9 +339,14 @@ export class PlanModeController extends Service {
           additionalProperties: false,
           properties: {
             approved: { type: 'boolean', const: true, required: true },
+            execution: {
+              type: 'string',
+              enum: ['clear', 'compact', 'keep'],
+              required: true,
+            },
           },
         },
-        render: () => [{ type: 'text', text: 'Plan approved — plan mode exited; carry out the plan starting with your next step.' }],
+        render: (_args, value) => [{ type: 'text', text: approvedResultText(value.execution) }],
       },
       execute: async (args, exec) => {
         const agent = exec.agent
@@ -338,13 +368,12 @@ export class PlanModeController extends Service {
             question: 'Approve this plan and leave plan mode?',
             detail: args.plan,
             options: [
-              { label: APPROVE_LABEL, description: 'Leave plan mode; the plan is carried out from the next step.' },
-              { label: KEEP_PLANNING_LABEL, description: 'Stay in plan mode; feedback goes back to the model.' },
+              { label: APPROVE_EXECUTE, description: 'Leave plan mode and execute in a fresh session without this planning conversation.' },
+              { label: APPROVE_COMPACT, description: 'Leave plan mode, compact this session, then execute the plan.' },
+              { label: APPROVE_KEEP, description: 'Leave plan mode and execute here with the planning history.' },
+              { label: REFINE_PLAN, description: 'Stay in plan mode; feedback goes back to the model.' },
             ],
-            // Presentation only: a capable UI renders the plan as a review
-            // decision instead of a generic question, and answers with one of
-            // the labels above either way.
-            intent: { kind: 'plan-review', approve: APPROVE_LABEL },
+            intent: { kind: 'plan-review', approve: [...APPROVE_LABELS] },
           }],
           agent,
           signal: exec.signal,
@@ -367,17 +396,34 @@ export class PlanModeController extends Service {
         }
         const reviewItems = answer.answers.filter(entry => entry.id === REVIEW_ID)
         const item = reviewItems.length === 1 ? reviewItems[0] : undefined
-        if (item?.selected.length !== 1 || item.selected[0] !== APPROVE_LABEL || item.custom !== undefined) {
+        const selected = item?.selected.length === 1 ? item.selected[0] : undefined
+        const execution = selected === undefined || item?.custom !== undefined
+          ? undefined
+          : executionOf(selected)
+        if (execution === undefined) {
           const feedback = item?.custom ?? ''
           throw new Error(feedback === ''
             ? 'The user chose to keep planning; revise the plan and present it again.'
             : `The user chose to keep planning; their feedback: ${feedback}`)
         }
-        // Keep plan guidance for the rest of this assistant tool batch. The
-        // silent selection is appended at the next accepted in-turn pre-step,
-        // before its request assembly.
+        const title = firstHeading(args.plan) ?? 'Plan'
+        try {
+          agent.session.append('plan/approved', { execution, title })
+        } catch (error) {
+          ctx.logger.warn('dsh-plan-handoff: failed to append plan/approved: %o', error)
+        }
         this.pendingIntents.set(agent.session, { active: false, narrate: false })
-        return { approved: true }
+        this.pendingHandoffs.set(agent.session, { execution, plan: args.plan, title })
+        if (agent.status === 'idle') {
+          const pending = this.pendingHandoffs.get(agent.session)
+          if (pending !== undefined) {
+            this.pendingHandoffs.delete(agent.session)
+            void runHandoff(this.ctx, agent, pending).catch((error: unknown) => {
+              ctx.logger.warn('dsh-plan-handoff: idle handoff failed: %o', error)
+            })
+          }
+        }
+        return { approved: true, execution }
       },
       presentCall: args => ({
         card: 'generic',

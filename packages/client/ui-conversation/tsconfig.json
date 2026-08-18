@@ -54,7 +54,7 @@
       "path": "../../llm/llm-retry"
     },
     {
-      "path": "../../plan/plan-mode"
+      "path": "../../plan/plan-handoff"
     },
     {
       "path": "../../goal/goal"

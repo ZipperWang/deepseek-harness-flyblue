@@ -483,7 +483,7 @@ describe('events frame schemas', () => {
   })
 
   it('carries a question presentation intent through, and rejects an unknown one', () => {
-    const intent = { kind: 'plan-review', approve: 'Approve' }
+    const intent = { kind: 'plan-review', approve: ['Approve'] }
     expect(askUserQuestionItemSchema.parse({
       id: 'plan-review', question: 'Approve?', detail: '# Plan', options: [{ label: 'Approve' }], intent,
     }).intent).toEqual(intent)

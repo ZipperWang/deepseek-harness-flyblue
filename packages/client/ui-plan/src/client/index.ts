@@ -14,7 +14,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: pulls the `plan` SessionProjectionMap merge for useProjection.
-import type {} from '@deepseek-ai/dsh-plan-mode/client'
+import type {} from '@deepseek-ai/dsh-plan-handoff/client'
 import { PlanChip } from './PlanModeControl.tsx'
 import { en, zh, type PlanKey } from './locales.ts'
 

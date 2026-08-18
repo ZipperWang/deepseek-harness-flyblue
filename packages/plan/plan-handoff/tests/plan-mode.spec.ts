@@ -137,7 +137,7 @@ function expectPlanCodeSdkBindings(sdk: string): void {
   expect(sdk).toContain('read: Record<string, JsonValue>;')
   expect(sdk).toContain('write: Record<string, JsonValue>;')
   expect(sdk).toContain('interface ToolOutputMap {')
-  expect(sdk).toContain('exit_plan_mode: {\n    approved: true;\n  };')
+  expect(sdk).toContain('exit_plan_mode: {\n    approved: true;\n    execution: "clear" | "compact" | "keep";\n  };')
   expect(sdk).toContain('[K in ToolName]: (args: ToolArgsMap[K]) => Promise<ToolOutputMap[K]>;')
 }
 
@@ -715,7 +715,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('rejects an empty or heading-less plan before asking the reviewer', async () => {
-    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve and keep context'] })
     for (const plan of ['', 'do things']) {
       const result = await callExit(ctx, agent, plan)
       expect(result.isError).toBe(true)
@@ -746,7 +746,7 @@ describe('exit_plan_mode', () => {
     const ctx = await setup()
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
-    const ask = vi.fn(async () => ({ answers: [{ id: 'plan-review', selected: ['Approve'] }] }))
+    const ask = vi.fn(async () => ({ answers: [{ id: 'plan-review', selected: ['Approve and keep context'] }] }))
     ctx.userQuestions.registerProvider({ ask })
     const root = await agentWithSession(ctx, 'review-root')
     const child = await agentWithSession(ctx, 'review-child', { active: true, owner: root })
@@ -763,11 +763,11 @@ describe('exit_plan_mode', () => {
   })
 
   it('approve: records the boundary-applied switch and confirms (the fold flips at the flush)', async () => {
-    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve and keep context'] })
     const result = await callExit(ctx, agent)
     expect(result.isError).toBe(false)
     if (result.isError) throw new Error('expected approved plan result')
-    expect(result.value).toEqual({ approved: true })
+    expect(result.value).toEqual({ approved: true, execution: 'keep' })
     expect(result.content).toEqual([{ type: 'text', text: 'Plan approved — plan mode exited; carry out the plan starting with your next step.' }])
     // Boundary-applied, not a direct append: the fold stays plan until the
     // step's end, so the plan policy covers any remaining call of the SAME batch.
@@ -778,7 +778,12 @@ describe('exit_plan_mode', () => {
     expect(asked).toHaveLength(1)
     expect(asked[0]?.agent).toBe(agent)
     expect(asked[0]?.questions[0]?.detail).toBe('# The plan\n\ndo things')
-    expect(asked[0]?.questions[0]?.options?.map(option => option.label)).toEqual(['Approve', 'Keep planning'])
+    expect(asked[0]?.questions[0]?.options?.map(option => option.label)).toEqual([
+      'Approve and execute',
+      'Approve and compact context',
+      'Approve and keep context',
+      'Refine plan',
+    ])
   })
 
   it('carries the exact plan through a Code Mode review and logs the nested dispatch', async () => {
@@ -803,7 +808,7 @@ describe('exit_plan_mode', () => {
     ctx.userQuestions.registerProvider({
       ask: (request) => {
         asked.push(request)
-        return Promise.resolve({ answers: [{ id: 'plan-review', selected: ['Approve'] }] })
+        return Promise.resolve({ answers: [{ id: 'plan-review', selected: ['Approve and keep context'] }] })
       },
     })
     const agent = await agentWithSession(ctx, 'code-mode-exit', { active: true })
@@ -832,7 +837,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('an approved exit projects the next assembly before the boundary and never removes the tool', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent } = await setupWithReview({ selected: ['Approve and keep context'] })
     const approved = await callExit(ctx, agent)
     expect(approved.isError).toBe(false)
     // Calls of the SAME assistant response were requested under the existing
@@ -850,7 +855,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('the exit flush narrates nothing — the tool result is the narration', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent } = await setupWithReview({ selected: ['Approve and keep context'] })
     header(agent.session)
     await callExit(ctx, agent)
     await boundary(ctx, agent, 'step-start')
@@ -859,7 +864,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('keep planning returns the corrective error carrying the feedback verbatim', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Keep planning'], custom: 'consider the resume path' })
+    const { ctx, agent } = await setupWithReview({ selected: ['Refine plan'], custom: 'consider the resume path' })
     const result = await callExit(ctx, agent)
     expect(result.isError).toBe(true)
     expect(result.content).toEqual([{ type: 'text', text: 'Error: The user chose to keep planning; their feedback: consider the resume path' }])
@@ -867,7 +872,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('keep planning without feedback returns the generic corrective error', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Keep planning'] })
+    const { ctx, agent } = await setupWithReview({ selected: ['Refine plan'] })
     const result = await callExit(ctx, agent)
     expect(result.isError).toBe(true)
     expect(result.content).toEqual([{ type: 'text', text: 'Error: The user chose to keep planning; revise the plan and present it again.' }])
@@ -882,7 +887,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('requires exactly the single Approve selection', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Approve', 'Keep planning'] })
+    const { ctx, agent } = await setupWithReview({ selected: ['Approve and keep context', 'Refine plan'] })
     const result = await callExit(ctx, agent)
     expect(result.isError).toBe(true)
     expect(result.content).toEqual([{ type: 'text', text: 'Error: The user chose to keep planning; revise the plan and present it again.' }])
@@ -890,7 +895,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('treats custom text alongside Approve as feedback, not consent', async () => {
-    const { ctx, agent } = await setupWithReview({ selected: ['Approve'], custom: 'change the tests' })
+    const { ctx, agent } = await setupWithReview({ selected: ['Approve and keep context'], custom: 'change the tests' })
     const result = await callExit(ctx, agent)
     expect(result.isError).toBe(true)
     expect(result.content).toEqual([{ type: 'text', text: 'Error: The user chose to keep planning; their feedback: change the tests' }])
@@ -901,8 +906,8 @@ describe('exit_plan_mode', () => {
     const { ctx, agent } = await setupWithReview()
     ctx.userQuestions.registerProvider({
       ask: () => Promise.resolve({ answers: [
-        { id: 'plan-review', selected: ['Approve'] },
-        { id: 'plan-review', selected: ['Keep planning'] },
+        { id: 'plan-review', selected: ['Approve and keep context'] },
+        { id: 'plan-review', selected: ['Refine plan'] },
       ] }),
     })
     const result = await callExit(ctx, agent)
@@ -920,13 +925,19 @@ describe('exit_plan_mode', () => {
   })
 
   it('declares the plan-review presentation intent naming its approve option', async () => {
-    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve and keep context'] })
     await callExit(ctx, agent)
     const question = asked[0]?.questions[0]
-    expect(question?.intent).toEqual({ kind: 'plan-review', approve: 'Approve' })
-    // The named label is one this same question offers, so a UI honouring the
-    // intent answers a choice this tool accepts.
-    expect(question?.options?.map(option => option.label)).toContain(question?.intent?.approve)
+    expect(question?.intent).toEqual({
+      kind: 'plan-review',
+      approve: [
+        'Approve and execute',
+        'Approve and compact context',
+        'Approve and keep context',
+      ],
+    })
+    expect(question?.intent?.approve.every(label => question.options?.some(option => option.label === label)))
+      .toBe(true)
   })
 
   it('reads a dismissed review as the user taking the turn back, not as a failure', async () => {
@@ -954,7 +965,7 @@ describe('exit_plan_mode', () => {
   })
 
   it('forwards the execution abort signal to the review question', async () => {
-    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve'] })
+    const { ctx, agent, asked } = await setupWithReview({ selected: ['Approve and keep context'] })
     const controller = new AbortController()
     const result = await ctx.tools.execute({
       callId: CallId(`call-exit-${++callCounter}`),
@@ -985,7 +996,7 @@ describe('exit_plan_mode', () => {
     // would claim an exit that can never flush — the call must fail instead.
     await new Promise(resolve => setImmediate(resolve))
     await fiber.dispose()
-    answer({ answers: [{ id: 'plan-review', selected: ['Approve'] }] })
+    answer({ answers: [{ id: 'plan-review', selected: ['Approve and keep context'] }] })
     const result = await pending
     expect(result.isError).toBe(true)
     expect(result.content).toEqual([{ type: 'text', text: 'Error: the plan-mode service was reloaded while the plan was under review; present the plan again' }])

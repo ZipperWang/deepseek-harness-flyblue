@@ -204,9 +204,9 @@ importers:
       '@deepseek-ai/dsh-persona':
         specifier: workspace:^
         version: link:../../packages/preset/persona
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:^
-        version: link:../../packages/plan/plan-mode
+        version: link:../../packages/plan/plan-handoff
       '@deepseek-ai/dsh-pwsh-local':
         specifier: workspace:^
         version: link:../../packages/shell/pwsh-local
@@ -548,9 +548,9 @@ importers:
       '@deepseek-ai/dsh-permission-presets':
         specifier: workspace:*
         version: link:../packages/interaction/permission-presets
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:*
-        version: link:../packages/plan/plan-mode
+        version: link:../packages/plan/plan-handoff
       '@deepseek-ai/dsh-pwsh-local':
         specifier: workspace:*
         version: link:../packages/shell/pwsh-local
@@ -1088,9 +1088,9 @@ importers:
       '@deepseek-ai/dsh-permission-presets':
         specifier: workspace:^
         version: link:../../interaction/permission-presets
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:^
-        version: link:../../plan/plan-mode
+        version: link:../../plan/plan-handoff
       '@deepseek-ai/dsh-pwsh-sandbox':
         specifier: workspace:^
         version: link:../../shell/pwsh-sandbox
@@ -1664,6 +1664,9 @@ importers:
       '@deepseek-ai/dsh-llm-retry':
         specifier: workspace:^
         version: link:../../llm/llm-retry
+      '@deepseek-ai/dsh-plan-handoff':
+        specifier: workspace:^
+        version: link:../../plan/plan-handoff
       '@deepseek-ai/dsh-session':
         specifier: workspace:^
         version: link:../../core/session
@@ -1972,9 +1975,9 @@ importers:
       '@deepseek-ai/dsh-permission-presets':
         specifier: workspace:^
         version: link:../../interaction/permission-presets
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:^
-        version: link:../../plan/plan-mode
+        version: link:../../plan/plan-handoff
       '@deepseek-ai/dsh-session-projection':
         specifier: workspace:^
         version: link:../../session/session-projection
@@ -2474,9 +2477,9 @@ importers:
       '@deepseek-ai/dsh-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:^
-        version: link:../../plan/plan-mode
+        version: link:../../plan/plan-handoff
       '@types/react':
         specifier: ~18.3.1
         version: 18.3.31
@@ -5914,7 +5917,7 @@ importers:
         specifier: ^2026.7.4
         version: 2026.7.10(zod@4.4.3)
 
-  packages/plan/plan-mode:
+  packages/plan/plan-handoff:
     dependencies:
       zod:
         specifier: ^4.4.3
@@ -5929,12 +5932,18 @@ importers:
       '@deepseek-ai/dsh-agent-loop':
         specifier: workspace:^
         version: link:../../core/agent-loop
+      '@deepseek-ai/dsh-agent-presets':
+        specifier: workspace:^
+        version: link:../../preset/agent-presets
       '@deepseek-ai/dsh-code-runtime':
         specifier: workspace:^
         version: link:../../code-runtime/code-runtime
       '@deepseek-ai/dsh-commands':
         specifier: workspace:^
         version: link:../../interaction/commands
+      '@deepseek-ai/dsh-compaction':
+        specifier: workspace:^
+        version: link:../../compaction/compaction
       '@deepseek-ai/dsh-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5947,6 +5956,9 @@ importers:
       '@deepseek-ai/dsh-session-projection':
         specifier: workspace:^
         version: link:../../session/session-projection
+      '@deepseek-ai/dsh-session-title':
+        specifier: workspace:^
+        version: link:../../session/session-title
       '@deepseek-ai/dsh-system-prompt':
         specifier: workspace:^
         version: link:../../core/system-prompt
@@ -5956,6 +5968,9 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: workspace:^
         version: link:../../interaction/user-questions
+      '@deepseek-ai/dsh-workspace':
+        specifier: workspace:^
+        version: link:../../workspace/workspace
 
   packages/preset/agent-presets:
     dependencies:
@@ -8998,9 +9013,9 @@ importers:
       '@deepseek-ai/dsh-permission-presets':
         specifier: workspace:^
         version: link:../../packages/interaction/permission-presets
-      '@deepseek-ai/dsh-plan-mode':
+      '@deepseek-ai/dsh-plan-handoff':
         specifier: workspace:^
-        version: link:../../packages/plan/plan-mode
+        version: link:../../packages/plan/plan-handoff
       '@deepseek-ai/dsh-repeat-tool-reminder':
         specifier: workspace:^
         version: link:../../packages/guard/repeat-tool-reminder

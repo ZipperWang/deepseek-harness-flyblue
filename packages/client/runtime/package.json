@@ -52,6 +52,7 @@
     "@deepseek-ai/dsh-llm-retry": "workspace:^",
     "@deepseek-ai/dsh-session": "workspace:^",
     "@deepseek-ai/dsh-session-projection": "workspace:^",
+    "@deepseek-ai/dsh-plan-handoff": "workspace:^",
     "@deepseek-ai/dsh-session-title": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^",
     "immer": "^10.1.1",

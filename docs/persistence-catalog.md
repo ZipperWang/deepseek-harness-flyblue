@@ -514,6 +514,33 @@ Source: [`packages/interaction/permission-presets/src/index.ts:50`](../packages/
 
 ### `plan/*`
 
+<a id="planapproved--log-only"></a>
+
+#### `plan/approved` — log-only
+
+```ts persistence-catalog
+/**
+ * Recorded when a review approves a plan: log-only. The plan markdown
+ * stays on the `exit_plan_mode` tool argument.
+ */
+'plan/approved': { execution: PlanExecution; title: string }
+```
+
+Source: [`packages/plan/plan-handoff/src/types.ts:31`](../packages/plan/plan-handoff/src/types.ts)
+
+<a id="planhandoff--log-only"></a>
+
+#### `plan/handoff` — log-only
+
+```ts persistence-catalog
+/**
+ * An approved plan left this session for a fresh sibling: log-only.
+ */
+'plan/handoff': { childSessionId: import('@deepseek-ai/dsh-session/types').SessionId; mode: 'clear' }
+```
+
+Source: [`packages/plan/plan-handoff/src/types.ts:26`](../packages/plan/plan-handoff/src/types.ts)
+
 <a id="planmode--log-only"></a>
 
 #### `plan/mode` — log-only
@@ -522,12 +549,12 @@ Source: [`packages/interaction/permission-presets/src/index.ts:50`](../packages/
 /**
  * Whether plan mode is in force from this point on: log-only, non-surface,
  * whole-value replace. The last `plan/mode` wins; a log with none folds to
- * inactive through {@link foldPlanMode}.
+ * inactive.
  */
 'plan/mode': { active: boolean }
 ```
 
-Source: [`packages/plan/plan-mode/src/index.ts:53`](../packages/plan/plan-mode/src/index.ts)
+Source: [`packages/plan/plan-handoff/src/types.ts:22`](../packages/plan/plan-handoff/src/types.ts)
 
 ### `request/*`
 

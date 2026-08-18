@@ -39,6 +39,9 @@
       "path": "../../session/session-projection"
     },
     {
+      "path": "../../plan/plan-handoff"
+    },
+    {
       "path": "../../session/session-title"
     },
     {

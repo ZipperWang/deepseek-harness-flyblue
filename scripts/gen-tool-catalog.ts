@@ -27,7 +27,7 @@ import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
 import type { ImageAttachmentLimits, ImageAttachmentRef, SaveImageAttachment, StoredImageAttachment } from '@deepseek-ai/dsh-attachment'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
-import PlanModeController from '@deepseek-ai/dsh-plan-mode'
+import PlanModeController from '@deepseek-ai/dsh-plan-handoff'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import * as WebSearchExa from '@deepseek-ai/dsh-web-search-exa'
 import * as WebFetchLocal from '@deepseek-ai/dsh-web-fetch-http'
@@ -213,9 +213,9 @@ const TOOL_PACKAGES: ToolPackage[] = [
       'Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry\'s only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime\'s language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result.',
   },
   {
-    pkg: '@deepseek-ai/dsh-plan-mode',
-    dir: 'plan-mode',
-    source: 'packages/plan/plan-mode/src/index.ts',
+    pkg: '@deepseek-ai/dsh-plan-handoff',
+    dir: 'plan-handoff',
+    source: 'packages/plan/plan-handoff/src/index.ts',
     requires: ['ctx.tools', 'ctx.systemPrompt', 'ctx.userQuestions (execution time, opportunistic)'],
     writes: ['tool/call', 'plan/mode inactive on an approved review', 'tool/result'],
     async mount(ctx) {

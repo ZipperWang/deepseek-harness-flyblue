@@ -33,7 +33,7 @@
       "path": "../web-react"
     },
     {
-      "path": "../../plan/plan-mode"
+      "path": "../../plan/plan-handoff"
     },
     {
       "path": "../../runtime-diagnostics/invariants"

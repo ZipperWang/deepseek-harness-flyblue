@@ -5,13 +5,8 @@
 // flow's pager, numbered options, skip and custom-answer affordances, which
 // read as a quiz the user is being graded on.
 //
-// The three actions are the whole decision surface: approve and decline answer
-// the question with the option labels the asker offered (localised copy on the
-// buttons, the asker's descriptions as their tooltips), while "discuss"
-// dismisses the request so the composer returns and the user can simply say
-// what they want. Dismissal is the generic flow's own cancel verb, promoted to
-// a labelled button because in a two-outcome decision it is the third real
-// answer, not an escape hatch.
+// Discuss dismisses the request so the composer returns. Refine stays in plan
+// mode. Each approve label leaves plan mode on a different execution path.
 
 import { useState } from 'react'
 import { Button, IconEditOutline16, MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -21,6 +16,20 @@ import css from './PlanReviewPanel.module.css'
 /** The panel's own props: the question domain face, the narrowed review, and the locale seat. */
 export type PlanReviewPanelProps =
   { pending: PendingQuestion; review: PlanReview } & Pick<QuestionComposerProps, 't'>
+
+/** Localise a known execution-path label; unknown labels use the generic approve copy. */
+function approveCopy(label: string, t: PlanReviewPanelProps['t']): string {
+  switch (label) {
+    case 'Approve and execute':
+      return t('plan.approve.execute')
+    case 'Approve and compact context':
+      return t('plan.approve.compact')
+    case 'Approve and keep context':
+      return t('plan.approve.keep')
+    default:
+      return t('plan.approve')
+  }
+}
 
 /**
  * Optional-prop spread for a decision button's tooltip: `title` is optional on
@@ -57,7 +66,7 @@ export function PlanReviewPanel({ pending, review, t }: PlanReviewPanelProps) {
   const decide = (label: string): void => {
     settle(() => pending.answer({ answers: [{ id: review.id, selected: [label] }] }))
   }
-  const decline = review.decline
+  const refine = review.refine
 
   return (
     <div className={css.frame} data-plan-review-key={pending.key}>
@@ -78,20 +87,24 @@ export function PlanReviewPanel({ pending, review, t }: PlanReviewPanelProps) {
             >
               {t('plan.discuss')}
             </Button>
-            {decline !== undefined && (
+            {refine !== undefined && (
               <Button
-                variant="outline" {...tooltip(decline.description)}
-                disabled={busy} onClick={() => { decide(decline.label) }}
+                variant="outline" {...tooltip(refine.description)}
+                disabled={busy} onClick={() => { decide(refine.label) }}
               >
-                {t('plan.decline')}
+                {t('plan.refine')}
               </Button>
             )}
-            <Button
-              variant="primary" {...tooltip(review.approve.description)}
-              disabled={busy} onClick={() => { decide(review.approve.label) }}
-            >
-              {t('plan.approve')}
-            </Button>
+            {review.approves.map((option, index) => (
+              <Button
+                key={option.label}
+                variant={index === review.approves.length - 1 ? 'primary' : 'outline'}
+                {...tooltip(option.description)}
+                disabled={busy} onClick={() => { decide(option.label) }}
+              >
+                {approveCopy(option.label, t)}
+              </Button>
+            ))}
           </div>
         </div>
       </section>

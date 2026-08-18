@@ -1369,9 +1369,9 @@ export interface Config {
 
 Source: [`packages/preset/persona/src/index.ts:34`](../packages/preset/persona/src/index.ts)
 
-<a id="deepseek-aidsh-plan-mode"></a>
+<a id="deepseek-aidsh-plan-handoff"></a>
 
-## `@deepseek-ai/dsh-plan-mode`
+## `@deepseek-ai/dsh-plan-handoff`
 
 Requires: `tools` · `systemPrompt`
 
@@ -1383,7 +1383,7 @@ export interface PlanModeConfig {
 }
 ```
 
-Source: [`packages/plan/plan-mode/src/index.ts:70`](../packages/plan/plan-mode/src/index.ts)
+Source: [`packages/plan/plan-handoff/src/index.ts:94`](../packages/plan/plan-handoff/src/index.ts)
 
 <a id="deepseek-aidsh-pwsh-local"></a>
 

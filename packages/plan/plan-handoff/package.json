@@ -1,6 +1,6 @@
 {
-  "name": "@deepseek-ai/dsh-plan-mode",
-  "description": "Logged per-agent plan mode with deployment guidance, a direct slash command, and a user-reviewed exit",
+  "name": "@deepseek-ai/dsh-plan-handoff",
+  "description": "Logged per-agent plan mode with OMP-inspired execution-spec guidance and keep/compact/clear handoff after review",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
-    "directory": "packages/plan/plan-mode"
+    "directory": "packages/plan/plan-handoff"
   },
   "type": "module",
   "main": "lib/index.js",
@@ -42,18 +42,34 @@
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/dsh-agent": "workspace:^",
+    "@deepseek-ai/dsh-agent-presets": "workspace:^",
     "@deepseek-ai/dsh-commands": "workspace:^",
+    "@deepseek-ai/dsh-compaction": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-session": "workspace:^",
     "@deepseek-ai/dsh-session-projection": "workspace:^",
+    "@deepseek-ai/dsh-session-title": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^",
     "@deepseek-ai/dsh-user-questions": "workspace:^",
+    "@deepseek-ai/dsh-workspace": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
   },
   "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-agent-presets": {
+      "optional": true
+    },
     "@deepseek-ai/dsh-commands": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-compaction": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session-title": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-workspace": {
       "optional": true
     }
   },
@@ -63,15 +79,19 @@
   "devDependencies": {
     "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-agent-loop": "workspace:^",
+    "@deepseek-ai/dsh-agent-presets": "workspace:^",
     "@deepseek-ai/dsh-code-runtime": "workspace:^",
     "@deepseek-ai/dsh-commands": "workspace:^",
+    "@deepseek-ai/dsh-compaction": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-session": "workspace:^",
     "@deepseek-ai/dsh-session-projection": "workspace:^",
+    "@deepseek-ai/dsh-session-title": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^",
     "@deepseek-ai/dsh-user-questions": "workspace:^",
+    "@deepseek-ai/dsh-workspace": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
   }
 }

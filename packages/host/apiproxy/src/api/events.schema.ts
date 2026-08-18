@@ -27,7 +27,7 @@ export const askUserQuestionItemSchema = z.object({
   // Presentation intent: a tagged union on the wire, so an unknown tag is a
   // rejected frame rather than a silently generic render.
   intent: z.discriminatedUnion('kind', [
-    z.object({ kind: z.literal('plan-review'), approve: z.string() }),
+    z.object({ kind: z.literal('plan-review'), approve: z.array(z.string()).min(1) }),
   ]).optional(),
 }) satisfies z.ZodType<Wire<AskUserQuestionItem>>
 

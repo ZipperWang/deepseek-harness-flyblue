@@ -336,5 +336,5 @@ Host SSH service. A connection loss after channel dispatch reports an unknown re
 @Remote({ authority: 'loopback' }) async exec(id: SshHostId, command: string): Promise<{ stdout: string; stderr: string; exitCode: number | null; result: 'known' | 'result-unknown' }>
 ```
 
-Source: [`packages/ssh/ssh/src/index.ts:33`](../../packages/ssh/ssh/src/index.ts)
+Source: [`packages/ssh/ssh/src/index.ts:38`](../../packages/ssh/ssh/src/index.ts)
 <!-- END GENERATED cordis-surface -->

@@ -16,7 +16,7 @@ export const inject = ['invariants']
 
 /**
  * No runtime invariant: plan state and boundary ownership are
- * audited by dsh-plan-mode, while the control is a slot effect whose
+ * audited by dsh-plan-handoff, while the control is a slot effect whose
  * declaration, registration, and teardown are exercised by this package.
  */
 const install: InvariantInstaller = () => {}

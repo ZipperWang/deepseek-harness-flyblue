@@ -14,10 +14,12 @@ import type { ConversationRuntime } from './conversation-assembler.ts'
 import type { SessionListEntry, TitledSessionSummary } from './lineage.ts'
 import { flattenLineage } from './lineage.ts'
 import type { PendingInteractionStatus } from './pending.ts'
-// Type-only merge edge: the title domain's client-namespace outlet declares
-// the 'title' projection key this manager projects into list rows (and any
-// useProjection('title') consumer reads). Zero value imports by construction.
+// Type-only merge edges: the title domain's client-namespace outlet declares
+// the 'title' projection key this manager projects into list rows, and the
+// plan domain's outlet declares `plan/handoff` so a live mux frame can be
+// distinguished from the rest of SessionEventMap. Zero value imports.
 import type {} from '@deepseek-ai/dsh-session-title/client'
+import type {} from '@deepseek-ai/dsh-plan-handoff/client'
 import { Notifier } from './notifier.ts'
 import { ProjectionValueStore } from './projection-store.ts'
 import { Session } from './session.ts'
@@ -88,7 +90,7 @@ function bufferedRequestKey(envelope: RpcRequest<MuxFrame>): string | undefined 
   }
 }
 
-/** Match ui-user-questions's binary plan-review routing at the wire boundary. */
+/** Match ui-user-questions's plan-review routing at the wire boundary. */
 function questionInteractionStatus(
   questions: Extract<MuxFrame, { type: 'question/requested' }>['questions'],
 ): PendingInteractionStatus {
@@ -97,9 +99,13 @@ function questionInteractionStatus(
   const intent = question.intent
   if (intent?.kind !== 'plan-review' || question.detail === undefined) return 'question'
   if (question.multiSelect === true) return 'question'
+  const approve = intent.approve
+  if (!Array.isArray(approve) || approve.length === 0) return 'question'
   const options = question.options ?? []
-  if (options.length > 2) return 'question'
-  return options.some(option => option.label === intent.approve) ? 'plan-review' : 'question'
+  if (!approve.every(label => options.some(option => option.label === label))) return 'question'
+  const named = new Set(approve)
+  const extras = options.filter(option => !named.has(option.label))
+  return extras.length <= 1 ? 'plan-review' : 'question'
 }
 
 /** Instance cluster + frame entry + the session list. */
@@ -149,6 +155,8 @@ export class SessionManager {
   private readonly jobsBySession = new Map<SessionId, readonly JobView[]>()
 
   private selected: SessionId | undefined
+  /** Child id from a live `plan/handoff` waiting for the session list to list it. */
+  private pendingPlanFocus: SessionId | undefined
 
   private listSnapshotCache: SessionListSnapshot
   /** Entry-identity cache (reference stability): list rebuilds reuse the previous entry
@@ -217,6 +225,15 @@ export class SessionManager {
     this.completedNotifications.delete(address.childSessionId)
     void this.refreshSubagents(address.childSessionId)
     this.notifier.notifyNow()
+  }
+
+  /** Select a pending plan-handoff child once it is listed. */
+  private trySelectPlanFocus(): void {
+    const childId = this.pendingPlanFocus
+    if (childId === undefined) return
+    if (!this.summaries.some(summary => summary.sessionId === childId)) return
+    this.pendingPlanFocus = undefined
+    this.select(childId)
   }
 
   /** Clear the selection (the layout falls to the no-session view state). */
@@ -683,6 +700,13 @@ export class SessionManager {
   handleMuxEnvelope(envelope: RpcRequest<MuxFrame>): void {
     const frame = envelope.payload
     if (frame.type === 'stream/error') return // Controller already treats this as stream failure
+    if (frame.type === 'session/event' && frame.event.type === 'plan/handoff' && this.selected === frame.sessionId) {
+      const childId = frame.event.data.childSessionId
+      if (childId !== '') {
+        this.pendingPlanFocus = childId
+        this.trySelectPlanFocus()
+      }
+    }
     if (
       frame.type === 'session/event'
       && frame.event.type === 'user/message'
@@ -804,6 +828,7 @@ export class SessionManager {
           ...(frame.agentPreset !== undefined ? { agentPreset: frame.agentPreset } : {}),
         })
         this.sessions.get(frame.sessionId)?.handleBlank(frame.blank)
+        this.trySelectPlanFocus()
         if (frame.origin === 'subagent' && frame.parentSessionId !== undefined) {
           this.markCatalogParentExpandable(frame.parentSessionId)
         }

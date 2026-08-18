@@ -947,7 +947,7 @@ describe('pending-interaction list status', () => {
         questions: [{
           id: 'plan', question: 'Approve?', detail: '# Plan',
           options: [{ label: 'Approve' }, { label: 'Refuse' }],
-          intent: { kind: 'plan-review', approve: 'Approve' },
+          intent: { kind: 'plan-review', approve: ['Approve'] },
         }],
       },
     })
@@ -956,10 +956,49 @@ describe('pending-interaction list status', () => {
     expect(manager.getListSnapshot().items[0]?.pendingInteraction).toBeUndefined()
   })
 
+  it('selects a listed child after a live plan/handoff on the current session', () => {
+    const manager = new SessionManager(new FakeApiClient(), fakeRemote())
+    manager.handleHostEnvelope({ rpcId: 'h1' as never, payload: { type: 'host/session-added', sessionId: S1, blank: false } })
+    manager.select(S1)
+    manager.handleMuxEnvelope({
+      rpcId: 'ph' as never,
+      payload: {
+        type: 'session/event',
+        sessionId: S1,
+        event: { type: 'plan/handoff', seq: 1, time: 1, data: { childSessionId: S2, mode: 'clear' } },
+      },
+    })
+    expect(manager.getListSnapshot().current).toBe(S1)
+    manager.handleHostEnvelope({
+      rpcId: 'h2' as never,
+      payload: { type: 'host/session-added', sessionId: S2, blank: true, parentSessionId: S1 },
+    })
+    expect(manager.getListSnapshot().current).toBe(S2)
+  })
+
+  it('selects the child immediately when plan/handoff arrives after the child is listed', () => {
+    const manager = new SessionManager(new FakeApiClient(), fakeRemote())
+    manager.handleHostEnvelope({ rpcId: 'h1' as never, payload: { type: 'host/session-added', sessionId: S1, blank: false } })
+    manager.handleHostEnvelope({
+      rpcId: 'h2' as never,
+      payload: { type: 'host/session-added', sessionId: S2, blank: true, parentSessionId: S1 },
+    })
+    manager.select(S1)
+    manager.handleMuxEnvelope({
+      rpcId: 'ph' as never,
+      payload: {
+        type: 'session/event',
+        sessionId: S1,
+        event: { type: 'plan/handoff', seq: 1, time: 1, data: { childSessionId: S2, mode: 'clear' } },
+      },
+    })
+    expect(manager.getListSnapshot().current).toBe(S2)
+  })
+
   it.each([
     ['missing detail', {}],
     ['multi-select', { detail: '# Plan', multiSelect: true }],
-    ['more than two options', { detail: '# Plan', options: [{ label: 'Approve' }, { label: 'Refuse' }, { label: 'Revise' }] }],
+    ['two unnamed extras', { detail: '# Plan', options: [{ label: 'Approve' }, { label: 'Refuse' }, { label: 'Revise' }] }],
     ['missing approve option', { detail: '# Plan', options: [{ label: 'Refuse' }] }],
   ])('keeps an unrenderable %s plan intent on the ordinary question flow', (_name, over) => {
     const manager = new SessionManager(new FakeApiClient(), fakeRemote())
@@ -970,7 +1009,7 @@ describe('pending-interaction list status', () => {
         type: 'question/requested', sessionId: S1,
         questions: [{
           id: 'plan', question: 'Approve?', options: [{ label: 'Approve' }],
-          intent: { kind: 'plan-review', approve: 'Approve' },
+          intent: { kind: 'plan-review', approve: ['Approve'] },
           ...over,
         }],
       },

@@ -24,11 +24,12 @@ export type AskUserQuestionIntent = {
   /** A plan submitted for review: `detail` is the plan markdown `ask()` requires, and the decision approves or declines it. */
   kind: 'plan-review'
   /**
-   * The option label that approves the plan; every other option declines it.
-   * Named rather than positional so no UI infers the verdict from option order.
-   * An `approve` naming no option of its own question is rejected at `ask()`.
+   * Option labels that leave plan mode (each execution path). Every other
+   * option stays in plan mode. Named rather than positional so no UI infers
+   * the verdict from option order. An `approve` entry naming no option of
+   * its own question is rejected at `ask()`.
    */
-  approve: string
+  approve: string[]
 }
 
 /** One question in a user-questions request. */

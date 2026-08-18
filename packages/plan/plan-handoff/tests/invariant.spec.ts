@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import SessionStore, { Session, SessionId, type SessionEvent } from '@deepseek-ai/dsh-session'
-import * as PlanModeInvariant from '@deepseek-ai/dsh-plan-mode/invariant'
+import * as PlanModeInvariant from '@deepseek-ai/dsh-plan-handoff/invariant'
 import InvariantRegistry from '@deepseek-ai/dsh-invariants'
 
 async function setup(): Promise<Context> {
@@ -41,6 +41,28 @@ describe('plan-mode stream invariants', () => {
     emitTurnStart(ctx, session)
     expect(() => { ctx.emit('session/event', session, event(active)) })
       .toThrow(/expected a boolean/)
+  })
+
+  it('accepts plan/handoff and plan/approved payloads', async () => {
+    const ctx = await setup()
+    const session = ctx.sessions.create()
+    expect(() => session.append('plan/handoff', { childSessionId: SessionId('child'), mode: 'clear' })).not.toThrow()
+    expect(() => session.append('plan/approved', { execution: 'keep', title: 'Title' })).not.toThrow()
+  })
+
+  it('rejects invalid plan/handoff and plan/approved payloads', async () => {
+    const ctx = await setup()
+    const session = Session.create(SessionId('bad-handoff'))
+    expect(() => {
+      ctx.emit('session/event', session, {
+        type: 'plan/handoff', seq: 0, time: 0, data: { childSessionId: '', mode: 'clear' },
+      } as SessionEvent)
+    }).toThrow(/childSessionId/)
+    expect(() => {
+      ctx.emit('session/event', session, {
+        type: 'plan/approved', seq: 0, time: 0, data: { execution: 'nope', title: 'T' },
+      } as SessionEvent)
+    }).toThrow(/execution/)
   })
 
   it('accepts standalone plan state between turns (the idle immediate commit)', async () => {

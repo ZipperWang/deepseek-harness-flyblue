@@ -1638,7 +1638,7 @@
     {
       "doc": "docs/subsystems/plan.md",
       "symbol": "PlanModeConfig",
-      "source": "packages/plan/plan-mode/src/index.ts"
+      "source": "packages/plan/plan-handoff/src/index.ts"
     },
     {
       "doc": "docs/subsystems/invariants.md",

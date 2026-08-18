@@ -47,7 +47,7 @@
     "@deepseek-ai/dsh-lsp": "workspace:*",
     "@deepseek-ai/dsh-lsp-stdio": "workspace:*",
     "@deepseek-ai/dsh-permission-presets": "workspace:*",
-    "@deepseek-ai/dsh-plan-mode": "workspace:*",
+    "@deepseek-ai/dsh-plan-handoff": "workspace:*",
     "@deepseek-ai/dsh-terminal": "workspace:*",
     "@deepseek-ai/dsh-terminal-bash": "workspace:*",
     "@deepseek-ai/dsh-pwsh-local": "workspace:*",

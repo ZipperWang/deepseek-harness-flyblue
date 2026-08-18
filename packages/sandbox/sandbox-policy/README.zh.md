@@ -1,4 +1,4 @@
-# dsh-sandbox-policy：沙箱策略归属位置（`ctx.sandboxPolicy`）
+﻿# dsh-sandbox-policy：沙箱策略归属位置（`ctx.sandboxPolicy`）
 
 [English](README.md) | 中文
 
@@ -34,7 +34,7 @@
 
 #### 模型看到的内容
 
-每个 agent 会话的当前运行时上下文快照中都有一项 `sandbox:policy` 贡献。它不枚举已装载的能力。工具插件继续负责操作与升权引导，批准策略单独贡献给同一份快照，计划引导仍由 `dsh-plan-mode` 的系统段落管理。
+每个 agent 会话的当前运行时上下文快照中都有一项 `sandbox:policy` 贡献。它不枚举已装载的能力。工具插件继续负责操作与升权引导，批准策略单独贡献给同一份快照，计划引导仍由 `dsh-plan-handoff` 的系统段落管理。
 
 ##### 只读
 

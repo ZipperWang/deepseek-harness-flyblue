@@ -41,17 +41,26 @@ const kit = {
 
 const PLAN = '# Ship the picker\n\n- read the store\n- render the rows\n'
 
-/** The plan-mode request shape: one question, the plan as detail, approve named. */
+/** The plan-handoff request: one question, the plan as detail, three approve paths. */
 const questions = (): QuestionWait['payload']['questions'] => [{
   id: 'plan-review',
   header: 'Plan review',
   question: 'Approve this plan and leave plan mode?',
   detail: PLAN,
   options: [
-    { label: 'Approve', description: 'Leave plan mode; the plan is carried out from the next step.' },
-    { label: 'Keep planning', description: 'Stay in plan mode; feedback goes back to the model.' },
+    { label: 'Approve and execute', description: 'Fresh session.' },
+    { label: 'Approve and compact context', description: 'Compact then execute.' },
+    { label: 'Approve and keep context', description: 'Keep history.' },
+    { label: 'Refine plan', description: 'Stay in plan mode.' },
   ],
-  intent: { kind: 'plan-review', approve: 'Approve' },
+  intent: {
+    kind: 'plan-review',
+    approve: [
+      'Approve and execute',
+      'Approve and compact context',
+      'Approve and keep context',
+    ],
+  },
 }]
 
 /** Carrier fixture over a scripted respond carrier. */
@@ -76,16 +85,31 @@ describe('planReviewOf', () => {
       id: 'plan-review',
       question: 'Approve this plan and leave plan mode?',
       plan: PLAN,
-      approve: { label: 'Approve', description: 'Leave plan mode; the plan is carried out from the next step.' },
-      decline: { label: 'Keep planning', description: 'Stay in plan mode; feedback goes back to the model.' },
+      approves: [
+        { label: 'Approve and execute', description: 'Fresh session.' },
+        { label: 'Approve and compact context', description: 'Compact then execute.' },
+        { label: 'Approve and keep context', description: 'Keep history.' },
+      ],
+      refine: { label: 'Refine plan', description: 'Stay in plan mode.' },
     })
   })
 
-  it('leaves the decline absent when the asker offered approve alone', () => {
+  it('leaves refine absent when the asker offered approve paths alone', () => {
     const [question] = questions()
-    const review = planReviewOf([{ ...question as object, options: [{ label: 'Approve' }] } as never])
-    expect(review?.approve).toEqual({ label: 'Approve' })
-    expect(review === undefined ? true : 'decline' in review).toBe(false)
+    const review = planReviewOf([{
+      ...question as object,
+      options: [
+        { label: 'Approve and execute' },
+        { label: 'Approve and compact context' },
+        { label: 'Approve and keep context' },
+      ],
+    } as never])
+    expect(review?.approves.map(option => option.label)).toEqual([
+      'Approve and execute',
+      'Approve and compact context',
+      'Approve and keep context',
+    ])
+    expect(review === undefined ? true : 'refine' in review).toBe(false)
   })
 
   it.each([
@@ -93,14 +117,15 @@ describe('planReviewOf', () => {
     ['no intent at all', () => [{ ...questions()[0] as object, intent: undefined }]],
     ['an intent without the plan as detail', () => [{ ...questions()[0] as object, detail: undefined }]],
     ['an intent whose approve names no option', () => [{
-      ...questions()[0] as object, intent: { kind: 'plan-review', approve: 'Ship it' },
+      ...questions()[0] as object, intent: { kind: 'plan-review', approve: ['Ship it'] },
     }]],
     ['an intent with no options at all', () => [{ ...questions()[0] as object, options: undefined }]],
-    // Two buttons cannot send a third label or a combination, and the generic
-    // flow can: an intent never costs the user a reachable answer.
-    ['a third option the card could not offer', () => [{
+    ['two unnamed extras the card could not offer', () => [{
       ...questions()[0] as object,
-      options: [{ label: 'Approve' }, { label: 'Keep planning' }, { label: 'Start over' }],
+      options: [
+        ...(questions()[0] as { options: object[] }).options,
+        { label: 'Start over' },
+      ],
     }]],
     ['a multi-select decision', () => [{ ...questions()[0] as object, multiSelect: true }]],
   ])('declines %s, leaving the request to the generic flow', (_case, build) => {
@@ -136,23 +161,22 @@ describe('PlanReviewPanel', () => {
     const { carrier, respond } = wait()
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    const approve = screen.getByRole('button', { name: zh['plan.approve'] })
-    expect(approve.getAttribute('title')).toBe('Leave plan mode; the plan is carried out from the next step.')
+    const approve = screen.getByRole('button', { name: zh['plan.approve.keep'] })
+    expect(approve.getAttribute('title')).toBe('Keep history.')
     fireEvent.click(approve)
-    expect(respond).toHaveBeenCalledWith(decidedEnvelope('Approve'))
-    // One-shot: every action locks until the host's resolved frame lands.
+    expect(respond).toHaveBeenCalledWith(decidedEnvelope('Approve and keep context'))
     expect(approve.hasAttribute('disabled')).toBe(true)
-    expect(screen.getByRole('button', { name: zh['plan.decline'] }).hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: zh['plan.refine'] }).hasAttribute('disabled')).toBe(true)
     fireEvent.click(approve)
     expect(respond).toHaveBeenCalledTimes(1)
   })
 
-  it('answers with the asker\'s decline label', () => {
+  it('answers with the asker\'s refine label', () => {
     const { carrier, respond } = wait()
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    fireEvent.click(screen.getByRole('button', { name: zh['plan.decline'] }))
-    expect(respond).toHaveBeenCalledWith(decidedEnvelope('Keep planning'))
+    fireEvent.click(screen.getByRole('button', { name: zh['plan.refine'] }))
+    expect(respond).toHaveBeenCalledWith(decidedEnvelope('Refine plan'))
   })
 
   it('dismisses the request so the composer returns for a plain message', () => {
@@ -172,22 +196,32 @@ describe('PlanReviewPanel', () => {
   it('omits the tooltip for an option carrying no description', () => {
     const { carrier } = wait({ questions: [{
       ...questions()[0] as object,
-      options: [{ label: 'Approve' }, { label: 'Keep planning' }],
+      options: [
+        { label: 'Approve and execute' },
+        { label: 'Approve and compact context' },
+        { label: 'Approve and keep context' },
+        { label: 'Refine plan' },
+      ],
     }] as never })
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    expect(screen.getByRole('button', { name: zh['plan.approve'] }).hasAttribute('title')).toBe(false)
-    expect(screen.getByRole('button', { name: zh['plan.decline'] }).hasAttribute('title')).toBe(false)
+    expect(screen.getByRole('button', { name: zh['plan.approve.keep'] }).hasAttribute('title')).toBe(false)
+    expect(screen.getByRole('button', { name: zh['plan.refine'] }).hasAttribute('title')).toBe(false)
   })
 
-  it('hides the decline action when the asker offered approve alone', () => {
+  it('hides the refine action when the asker offered approve paths alone', () => {
     const { carrier } = wait({ questions: [{
-      ...questions()[0] as object, options: [{ label: 'Approve' }],
+      ...questions()[0] as object,
+      options: [
+        { label: 'Approve and execute' },
+        { label: 'Approve and compact context' },
+        { label: 'Approve and keep context' },
+      ],
     }] as never })
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    expect(screen.queryByRole('button', { name: zh['plan.decline'] })).toBeNull()
-    expect(screen.getByRole('button', { name: zh['plan.approve'] })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: zh['plan.refine'] })).toBeNull()
+    expect(screen.getByRole('button', { name: zh['plan.approve.keep'] })).toBeTruthy()
   })
 
   it('re-arms the actions and says why when the decision does not land', async () => {
@@ -197,12 +231,11 @@ describe('PlanReviewPanel', () => {
     )
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    fireEvent.click(screen.getByRole('button', { name: zh['plan.approve'] }))
+    fireEvent.click(screen.getByRole('button', { name: zh['plan.approve.keep'] }))
     const failure = await screen.findByText('question response rejected: not-pending')
     expect(failure.getAttribute('role')).toBe('status')
-    // Re-armed for the retry: a lost click must not leave a dead card.
-    expect(screen.getByRole('button', { name: zh['plan.approve'] }).hasAttribute('disabled')).toBe(false)
-    fireEvent.click(screen.getByRole('button', { name: zh['plan.approve'] }))
+    expect(screen.getByRole('button', { name: zh['plan.approve.keep'] }).hasAttribute('disabled')).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: zh['plan.approve.keep'] }))
     expect(respond).toHaveBeenCalledTimes(2)
   })
 
@@ -222,8 +255,10 @@ describe('PlanReviewPanel', () => {
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} t={seatOver(en, commonEn)} />)
 
     expect(screen.getByText('Plan review')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Refuse' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Execute' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Compact and execute' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Keep context' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Refine plan' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Chat about it' })).toBeTruthy()
   })
 })

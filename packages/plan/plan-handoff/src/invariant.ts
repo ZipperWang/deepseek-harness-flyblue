@@ -1,13 +1,13 @@
-/** Package-owned durable plan-mode invariants. @module @deepseek-ai/dsh-plan-mode/invariant */
+/** Package-owned durable plan-handoff invariants. @module @deepseek-ai/dsh-plan-handoff/invariant */
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { Session, SessionEvent } from '@deepseek-ai/dsh-session'
 import type { InvariantFailure, InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-plan-mode'
+const PACKAGE_NAME = '@deepseek-ai/dsh-plan-handoff'
 
 /** Cordis companion plugin name. */
-export const name = 'plan-mode-invariant'
+export const name = 'plan-handoff-invariant'
 /** Service required before the companion can reserve package ownership. */
 export const inject = ['invariants']
 
@@ -18,10 +18,31 @@ export const inject = ['invariants']
  * no turn-enclosure relation exists — only the payload shape is checkable.
  */
 function validateEvent(event: SessionEvent, fail: InvariantFailure): void {
-  if (event.type !== 'plan/mode') return
-  const active = (event.data as { active?: unknown }).active
-  if (typeof active !== 'boolean') {
-    fail(`plan/mode carries invalid active state ${JSON.stringify(active)}; expected a boolean`)
+  if (event.type === 'plan/mode') {
+    const active = (event.data as { active?: unknown }).active
+    if (typeof active !== 'boolean') {
+      fail(`plan/mode carries invalid active state ${JSON.stringify(active)}; expected a boolean`)
+    }
+    return
+  }
+  if (event.type === 'plan/handoff') {
+    const data = event.data as { childSessionId?: unknown; mode?: unknown }
+    if (typeof data.childSessionId !== 'string' || data.childSessionId === '') {
+      fail('plan/handoff requires a non-empty childSessionId')
+    }
+    if (data.mode !== 'clear') {
+      fail(`plan/handoff carries invalid mode ${JSON.stringify(data.mode)}; expected "clear"`)
+    }
+    return
+  }
+  if (event.type === 'plan/approved') {
+    const data = event.data as { execution?: unknown; title?: unknown }
+    if (data.execution !== 'clear' && data.execution !== 'compact' && data.execution !== 'keep') {
+      fail(`plan/approved carries invalid execution ${JSON.stringify(data.execution)}`)
+    }
+    if (typeof data.title !== 'string' || data.title.trim() === '') {
+      fail('plan/approved requires a non-empty title')
+    }
   }
 }
 

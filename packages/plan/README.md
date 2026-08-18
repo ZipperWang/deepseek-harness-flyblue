@@ -6,7 +6,7 @@ Plan mode is logged, per-agent collaboration state rather than a generic mode re
 
 | Package | Role | ctx key |
 |---|---|---|
-| [`plan-mode/`](plan-mode/README.md) | Owns plan-mode state, guidance, commands, and review flow | `ctx.planMode` |
+| [`plan-handoff/`](plan-handoff/README.md) | Owns plan-mode state, guidance, review, and keep/compact/clear execution | `ctx.planMode` |
 
 The [plan-specific collaboration state](../../.agents/notes/implemented/simplification/2026-07-22-plan-specific-collaboration-state.md) decision records the family design.
 

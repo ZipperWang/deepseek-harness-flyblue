@@ -28,9 +28,9 @@ type QuestionOption = NonNullable<QuestionItem['options']>[number]
 /**
  * A request narrowed to the `plan-review` presentation intent: everything the
  * decision card renders and answers with, so the panel never re-reads the
- * request shape. `approve` and `decline` are the asker's own options — an
- * answer must carry one of those labels verbatim — and `plan` is the markdown
- * body under review.
+ * request shape. `approves` leave plan mode and `refine` stays — an answer
+ * must carry one of those labels verbatim — and `plan` is the markdown body
+ * under review.
  */
 export interface PlanReview {
   /** The reviewed question's id, echoed in the answer. */
@@ -39,10 +39,10 @@ export interface PlanReview {
   question: string
   /** The plan markdown under review. */
   plan: string
-  /** The option that approves the plan. */
-  approve: QuestionOption
-  /** The option that declines it; absent when the asker offered no other option. */
-  decline?: QuestionOption
+  /** Options that leave plan mode, in the intent's order. */
+  approves: QuestionOption[]
+  /** The option that stays in plan mode; absent when the asker offered none. */
+  refine?: QuestionOption
 }
 
 /**
@@ -52,35 +52,38 @@ export interface PlanReview {
  * The card is one decision over one plan, and it claims a request only when it
  * can send every answer that request allows — an intent changes the layout,
  * never which answers are reachable. So the batch must be a single question
- * that declares the intent, carries the plan as its detail, offers the approve
- * label the intent names, and is a binary single choice: at most one option
- * besides approve, and not multi-select. A third option or a multi-select batch
- * has answers two buttons cannot express, so the generic flow keeps it — as it
- * keeps any request whose intent the asker's own service would have rejected,
- * because the client sits downstream of a wire boundary and every request must
- * stay answerable.
+ * that declares the intent, carries the plan as its detail, offers every
+ * approve label the intent names, and has at most one other option (refine),
+ * not multi-select. Extra unnamed options have answers the card cannot
+ * express, so the generic flow keeps them.
  *
  * @param questions - the request's whole question batch.
  * @returns The narrowed review, or undefined when the generic flow owns it.
  */
 export function planReviewOf(questions: readonly QuestionItem[]): PlanReview | undefined {
   if (questions.length !== 1) return undefined
-  // Length-checked above; the index read is the narrowing tax, not a guess.
   const question = questions[0] as QuestionItem
   const intent = question.intent
   if (intent?.kind !== 'plan-review' || question.detail === undefined) return undefined
   if (question.multiSelect === true) return undefined
+  const named = intent.approve
+  if (!Array.isArray(named) || named.length === 0) return undefined
   const options = question.options ?? []
-  if (options.length > 2) return undefined
-  const approve = options.find(option => option.label === intent.approve)
-  if (approve === undefined) return undefined
-  const decline = options.find(option => option.label !== intent.approve)
+  const byLabel = new Map(options.map(option => [option.label, option]))
+  const approves: QuestionOption[] = []
+  for (const label of named) {
+    const option = byLabel.get(label)
+    if (option === undefined) return undefined
+    approves.push(option)
+  }
+  const extras = options.filter(option => !named.includes(option.label))
+  if (extras.length > 1) return undefined
   return {
     id: question.id,
     question: question.question,
     plan: question.detail,
-    approve,
-    ...(decline === undefined ? {} : { decline }),
+    approves,
+    ...(extras[0] === undefined ? {} : { refine: extras[0] }),
   }
 }
 

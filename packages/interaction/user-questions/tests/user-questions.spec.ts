@@ -3,6 +3,7 @@ import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
 import UserQuestionService, {
   UserQuestionError,
+  type AskUserQuestionIntent,
   type AskUserQuestionRequest,
   type UserQuestionProvider,
 } from '@deepseek-ai/dsh-user-questions'
@@ -174,7 +175,7 @@ describe('UserQuestionService', () => {
         questions: [{
           ...question,
           ...(options === undefined ? {} : { options }),
-          intent: { kind: 'plan-review', approve: 'Ship it' },
+          intent: { kind: 'plan-review', approve: ['Ship it'] },
         }],
       })).rejects.toMatchObject({ name: 'UserQuestionError', code: 'BAD_INTENT' })
     }
@@ -193,7 +194,7 @@ describe('UserQuestionService', () => {
       questions: [{
         id: 'plan-review', question: 'Approve?',
         options: [{ label: 'Approve' }, { label: 'Keep planning' }],
-        intent: { kind: 'plan-review', approve: 'Approve' },
+        intent: { kind: 'plan-review', approve: ['Approve'] },
       }],
     })).rejects.toMatchObject({ name: 'UserQuestionError', code: 'BAD_INTENT' })
     expect(p.ask).not.toHaveBeenCalled()
@@ -204,7 +205,7 @@ describe('UserQuestionService', () => {
     await ctx.plugin(UserQuestionService)
     const p = provider('Approve')
     ctx.userQuestions.registerProvider(p)
-    const intent = { kind: 'plan-review', approve: 'Approve' } as const
+    const intent: AskUserQuestionIntent = { kind: 'plan-review', approve: ['Approve'] }
 
     const result = await ctx.userQuestions.ask({
       questions: [
