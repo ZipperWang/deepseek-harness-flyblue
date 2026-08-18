@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-git-graph/README.md
-README.md: 89329d5525697a5de82220c12927c5e18127ebaf
-README.zh.md: 54b5347534176fb5c20fca8fc589fdffd7de7175
+README.md: dfa617025a5eb2f3c7e13dc05b9aaa369a7c2cb4
+README.zh.md: ee859b4a69977e291fb18614cc1ebcf1719dff48

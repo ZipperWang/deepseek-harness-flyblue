@@ -1,0 +1,41 @@
+/** Chinese SSH dictionary. */
+export const zh = {
+  nav: 'SSH 运维', title: 'SSH 运维', intro: '主机配置和远程运维仅可从本机浏览器使用。',
+  loading: '正在加载主机', refresh: '刷新', refreshing: '刷新中…', retry: '重试', error: '无法更新 SSH 配置',
+  hosts: '主机', 'count.hosts': '已配置 {count} 台主机', noHosts: '还没有配置主机。',
+  addHost: '添加主机', editHost: '编辑主机', saveHost: '保存主机', cancel: '取消',
+  'field.alias': '别名', 'field.host': '主机地址', 'field.port': '端口', 'field.user': '用户名',
+  'auth.password': '密码认证', 'auth.key': '密钥认证', 'field.password': '密码', 'field.keyPath': '私钥路径',
+  deleteHost: '删除', deleteHostConfirm: '确认删除?', hostSelected: '已选中',
+  console: '远程控制台', consoleHint: '在所选主机上执行一条命令，输出不会自动重试。',
+  commandPlaceholder: '输入要执行的命令…', run: '执行', running: '执行中…', runAria: '执行命令',
+  selectHostHint: '请先在列表中选择一台主机。', commandEmpty: '命令不能为空。',
+  clearOutput: '清空输出', consoleEmpty: '还没有执行任何命令。',
+  resultUnknown: '连接在命令送出后中断，结果未知；请勿重复执行非幂等命令。',
+  termSignal: '信号 {signal}', termExit: '退出码 {code}',
+  termRunning: '运行中', termFailed: '失败', termDone: '已完成',
+  termCopy: '复制', termCopied: '复制成功', termNoOutput: '无输出',
+  termCollapseAria: '收起输出', termCollapse: '收起',
+  termExpandAria: '展开其余 {hidden} 行输出', termExpand: '… 其余 {hidden} 行',
+} as const
+
+/** English SSH dictionary. */
+export const en: Record<keyof typeof zh, string> = {
+  nav: 'SSH operations', title: 'SSH operations', intro: 'Host configuration and remote operations are available only from a local browser.',
+  loading: 'Loading hosts', refresh: 'Refresh', refreshing: 'Refreshing…', retry: 'Retry', error: 'Could not update SSH configuration',
+  hosts: 'Hosts', 'count.hosts': '{count} configured hosts', noHosts: 'No hosts configured yet.',
+  addHost: 'Add host', editHost: 'Edit host', saveHost: 'Save host', cancel: 'Cancel',
+  'field.alias': 'Alias', 'field.host': 'Host address', 'field.port': 'Port', 'field.user': 'Username',
+  'auth.password': 'Password auth', 'auth.key': 'Key auth', 'field.password': 'Password', 'field.keyPath': 'Private key path',
+  deleteHost: 'Delete', deleteHostConfirm: 'Delete host?', hostSelected: 'Selected',
+  console: 'Remote console', consoleHint: 'Runs one command on the selected host; output is never auto-retried.',
+  commandPlaceholder: 'Type a command to run…', run: 'Run', running: 'Running…', runAria: 'Run command',
+  selectHostHint: 'Select a host from the list first.', commandEmpty: 'Command must not be empty.',
+  clearOutput: 'Clear output', consoleEmpty: 'No command has been run yet.',
+  resultUnknown: 'The connection dropped after dispatch and the result is unknown; do not repeat non-idempotent commands.',
+  termSignal: 'signal {signal}', termExit: 'exit {code}',
+  termRunning: 'Running', termFailed: 'Failed', termDone: 'Done',
+  termCopy: 'Copy', termCopied: 'Copied', termNoOutput: 'No output',
+  termCollapseAria: 'Collapse output', termCollapse: 'Collapse',
+  termExpandAria: 'Show the remaining {hidden} output lines', termExpand: '… {hidden} more lines',
+}

@@ -1,0 +1,347 @@
+/* Git graph settings page: change rows with stage/discard actions, branch
+   management, and the lane-assigned commit graph. */
+
+.section {
+  --lane-0: var(--dsw-alias-state-business-primary);
+  --lane-1: var(--dsw-alias-state-success-primary);
+  --lane-2: var(--dsw-alias-state-warn-primary);
+  --lane-3: var(--dsw-alias-state-error-primary);
+  --lane-4: var(--dsw-alias-label-tertiary);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 720px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.intro {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workspacePill {
+  min-width: 0;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spin {
+  animation: dsh-git-graph-spin 700ms linear infinite;
+}
+
+@keyframes dsh-git-graph-spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-state-error-primary);
+  border-radius: 10px;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.empty {
+  padding: 14px 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 3px 6px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  transition: background-color 120ms var(--ds-ease-in-out);
+  animation: dsh-git-graph-row-in 240ms var(--ds-ease-in-out) backwards;
+  animation-delay: calc(var(--row-index) * 24ms);
+}
+
+.row:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.kindStaged {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.kindUnstaged {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.kindUntracked {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-warn-tertiary);
+  color: var(--dsw-alias-state-warn-primary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.kindConflict {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--dsw-alias-interactive-bg-hover-danger);
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.path {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--ds-font-family-code);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.section .danger {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.branchIcon {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.branchIconCurrent {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.branchName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branchCurrent {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branchForm {
+  display: flex;
+  gap: 8px;
+}
+
+.branchForm > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.commits {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commitRow {
+  display: grid;
+  grid-template-columns: auto 92px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 2px 6px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  transition: background-color 120ms var(--ds-ease-in-out);
+  animation: dsh-git-graph-row-in 240ms var(--ds-ease-in-out) backwards;
+  animation-delay: calc(var(--row-index) * 24ms);
+}
+
+.commitRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+@keyframes dsh-git-graph-row-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lanes {
+  position: relative;
+  display: flex;
+  flex: none;
+  height: 30px;
+}
+
+.laneCol {
+  position: relative;
+  width: 14px;
+  height: 100%;
+}
+
+.laneLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--dsw-alias-border-l2);
+  transform: translateX(-50%);
+}
+
+.laneDot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lane-color);
+  box-shadow: 0 0 0 2px var(--dsw-alias-bg-layer-2);
+  transform: translate(-50%, -50%);
+}
+
+.hash {
+  overflow: hidden;
+  font-family: var(--ds-font-family-code);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subject {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: 220px;
+}
+
+.copy {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonCard {
+  height: 96px;
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  animation: dsh-git-graph-pulse var(--ds-transition-duration-slow) var(--ds-ease-in-out) infinite alternate;
+}
+
+@keyframes dsh-git-graph-pulse {
+  from { opacity: .55; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row, .commitRow { animation: none; }
+  .spin { animation: none; }
+  .skeletonCard { animation: none; }
+}

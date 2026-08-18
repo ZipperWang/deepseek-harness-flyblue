@@ -2,9 +2,9 @@
 
 English | [中文](README.zh.md)
 
-Browser settings section for bounded inspection of the first registered workspace. The plugin registers `workspace-inspector` in `settings.section`, lists the workspace root through `workspaceFiles.tree()`, and opens text previews through `workspaceFiles.preview()`.
+Browser settings section for bounded inspection of the first registered workspace. The plugin registers `workspace-inspector` in `settings.section`, lists one directory at a time through `workspaceFiles.tree()`, searches filenames through `workspaceFiles.search()`, and opens text previews through `workspaceFiles.preview()`.
 
-All path authorization, link rejection, preview bounds, and version metadata remain Host responsibilities. The section displays RPC failures as an alert and marks a preview when the Host reports truncation.
+The listing supports breadcrumb navigation, file-size labels, and a two-pane preview that shows the path, a version token, and a truncation mark when the Host reports one. All path authorization, link rejection, preview bounds, and version metadata remain Host responsibilities. The section is read-only; it displays RPC failures as an alert banner with retry.
 
 ## Model Experience
 
@@ -17,4 +17,4 @@ None; workspace browsing does not participate in provider requests.
 ## Known Limitations and Deferred Work
 
 - The section always selects the first registered workspace and provides no workspace picker.
-- The current tree is limited to root entries and provides no directory navigation, search, editing, rename, creation, or deletion controls.
+- The section does not expose create, rename, save, or delete controls.
