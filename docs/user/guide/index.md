@@ -6,7 +6,7 @@ Start the Web UI through the [root README](../../../README.md#run); the command 
 
 ## Configure a model
 
-Open **Settings → Models**, enter a DeepSeek API key, and save it. The model route becomes usable immediately without restarting the server. The composer model chip is a Claude-style reasoning slider: pick the model, then Off / Low / Medium / High / Extra / Max. Disable the `effort-slider` profile row to restore the native trigger.
+Open **Settings → Models**, enter a [DeepSeek API key](https://platform.deepseek.com/), and save it. The model route becomes usable immediately without restarting the server. The composer model chip is a Claude-style reasoning slider: pick the model, then Off / Low / Medium / High / Extra / Max. Disable the `effort-slider` profile row to restore the native trigger.
 
 The [model configuration guide](./providers.md) covers other providers and custom OpenAI-compatible endpoints.
 

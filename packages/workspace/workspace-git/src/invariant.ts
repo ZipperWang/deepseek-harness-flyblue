@@ -1,6 +1,9 @@
 /** Package-owned invariant companion for shared workspace Git state. */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+/**
+ * No runtime invariant: the service is stateless across calls and re-reads repository state before every guarded Git operation.
+ */
 const install: InvariantInstaller = () => {}
 export const name = 'workspace-git-invariant'
 export const inject = ['invariants']
